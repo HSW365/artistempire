@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>ARTIST EMPIRE — The Indie Artist Ecosystem</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#050507;--bg2:#0a0a0f;--bg3:#111118;--bg4:#18181f;
+  --y:#E8FF00;--y2:#b8cc00;--red:#FF2D2D;--blue:#00D4FF;
+  --green:#00FF88;--purple:#9B59FF;--orange:#FF6B00;
+  --txt:#FAFAFA;--muted:#6a6a80;--muted2:#2e2e40;
+  --border:rgba(255,255,255,.06);--border-y:rgba(232,255,0,.15);
+  --font:'Inter',sans-serif;--head:'Bebas Neue',cursive;--alt:'Syne',sans-serif;
+  --r:10px;--nav:58px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--font);overflow:hidden}
+button{cursor:pointer;font-family:var(--font);border:none}
+input,select,textarea{font-family:var(--font)}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:2px;height:2px}::-webkit-scrollbar-thumb{background:var(--y)}
+
+#ld{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#ld.out{animation:ldout .5s ease forwards}
+@keyframes ldout{to{opacity:0;pointer-events:none;visibility:hidden}}
+.ld-logo{font-family:var(--head);font-size:52px;letter-spacing:8px;color:var(--y);text-shadow:0 0 40px rgba(232,255,0,.3)}
+.ld-sub{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--muted)}
+.ld-bar{width:160px;height:1px;background:var(--muted2)}
+.ld-fill{height:100%;background:var(--y);animation:ldfill 1.2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes ldfill{from{width:0}to{width:100%}}
+
+#toasts{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:rgba(8,8,12,.95);border:1px solid var(--border);border-left:2px solid var(--y);border-radius:20px;padding:8px 18px;font-size:12px;font-weight:600;white-space:nowrap;animation:tin .2s ease,tout .2s 3s ease both}
+.toast.err{border-left-color:var(--red)}.toast.ok{border-left-color:var(--green)}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tout{to{opacity:0}}
+
+#app{height:100vh;display:grid;grid-template-rows:var(--nav) 1fr;overflow:hidden}
+
+#tnav{background:rgba(5,5,7,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;z-index:200}
+.tn-logo{font-family:var(--head);font-size:22px;letter-spacing:5px;color:var(--y);cursor:pointer;flex-shrink:0;text-shadow:0 0 16px rgba(232,255,0,.25)}
+.tn-search{flex:1;max-width:300px}
+.tn-search input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:7px 14px;color:var(--txt);font-size:12px;outline:none;transition:.2s}
+.tn-search input:focus{border-color:var(--y)}
+.tn-r{display:flex;gap:7px;align-items:center;margin-left:auto}
+.nbtn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 13px;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;transition:.2s}
+.nbtn:hover{border-color:var(--y);color:var(--y)}
+.nbtn.pri{background:var(--y);border-color:var(--y);color:#000;font-weight:700}
+.nbtn.pri:hover{background:var(--y2)}
+#tn-user{display:none;align-items:center;gap:8px}
+#tn-user.on{display:flex}
+.tn-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--y),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;color:#000;font-family:var(--alt);flex-shrink:0}
+.tn-plan{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:20px;background:rgba(232,255,0,.08);color:var(--y);border:1px solid rgba(232,255,0,.18);text-transform:uppercase}
+
+#body{display:grid;grid-template-columns:200px 1fr 260px;overflow:hidden}
+@media(max-width:900px){#body{grid-template-columns:54px 1fr 0}}
+@media(max-width:600px){#body{grid-template-columns:0 1fr 0}}
+
+#sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+#sidebar::-webkit-scrollbar{display:none}
+.sib-sec{padding:14px 14px 4px;font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted2);text-transform:uppercase}
+.sib-i{display:flex;align-items:center;gap:9px;padding:9px 14px;color:var(--muted);cursor:pointer;font-size:12px;font-weight:500;border-left:2px solid transparent;transition:.15s;position:relative}
+.sib-i:hover{color:var(--txt);background:rgba(232,255,0,.03)}
+.sib-i.on{color:var(--y);border-left-color:var(--y);background:rgba(232,255,0,.05)}
+.sib-ic{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.sib-badge{position:absolute;right:12px;background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:1px 5px;border-radius:20px}
+
+#center{overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+#center::-webkit-scrollbar{display:none}
+.view{display:none}
+.view.on{display:block}
+
+#rp{background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;padding:14px}
+#rp::-webkit-scrollbar{display:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;font-weight:600;font-size:13px;transition:.2s;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn-y{background:var(--y);color:#000;padding:11px 22px}
+.btn-y:hover{background:var(--y2);box-shadow:0 4px 16px rgba(232,255,0,.25)}
+.btn-out{background:transparent;border:1px solid var(--border);color:var(--txt);padding:10px 20px}
+.btn-out:hover{border-color:var(--y);color:var(--y)}
+.btn-red{background:var(--red);color:#fff;padding:11px 22px}
+.btn-green{background:var(--green);color:#000;padding:11px 22px}
+.btn-green:hover{box-shadow:0 4px 14px rgba(0,255,136,.25)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--txt);padding:10px 20px}
+.btn-sm{padding:6px 13px;font-size:11px}
+.btn-full{width:100%}
+
+.mwrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(12px)}
+.mwrap.on{display:flex;animation:mfade .18s ease}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg2);border:1px solid var(--border-y);border-radius:16px;padding:30px;max-width:400px;width:100%;position:relative;animation:mup .22s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
+.modal::-webkit-scrollbar{display:none}
+@keyframes mup{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.mcl{position:absolute;top:13px;right:13px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mh{font-family:var(--head);font-size:26px;letter-spacing:2px;color:var(--y);margin-bottom:4px}
+.ms{font-size:12px;color:var(--muted);margin-bottom:18px}
+.fl{margin-bottom:10px}
+.fl label{display:block;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fl input,.fl select,.fl textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--txt);font-size:13px;outline:none;transition:.2s}
+.fl input:focus,.fl select:focus{border-color:var(--y)}
+.fl select option{background:#111}
+
+.feed-wrap{max-width:640px;margin:0 auto;padding-bottom:80px}
+.post{padding:14px;border-bottom:1px solid var(--border);transition:.1s}
+.post:hover{background:rgba(255,255,255,.01)}
+.ph{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pav{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-family:var(--alt);cursor:pointer}
+.pm{flex:1;min-width:0}
+.pname{font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}
+.phandle{font-size:10px;color:var(--muted)}
+.ptime{font-size:10px;color:var(--muted);flex-shrink:0}
+.pbody{font-size:13px;line-height:1.55;margin-bottom:10px;color:rgba(250,250,250,.82)}
+.ptag{color:var(--y);font-size:12px}
+.pmedia{border-radius:var(--r);overflow:hidden;margin-bottom:10px;background:var(--bg3);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:44px;cursor:pointer;position:relative}
+.pmedia-badge{position:absolute;top:8px;left:8px;background:var(--red);color:#fff;font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:4px}
+.pprod{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;gap:10px;align-items:center;margin-bottom:10px;cursor:pointer;transition:.2s}
+.pprod:hover{border-color:rgba(232,255,0,.2)}
+.pprod-ic{width:50px;height:50px;border-radius:7px;background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.pprod-info{flex:1;min-width:0}
+.pprod-name{font-size:12px;font-weight:600}
+.pprod-type{font-size:10px;color:var(--muted);margin:2px 0 3px}
+.pprod-price{font-family:var(--head);font-size:17px;color:var(--y)}
+.pprod-btn{background:var(--y);color:#000;border:none;border-radius:5px;padding:6px 12px;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0}
+.pactions{display:flex;gap:0;margin:0 -6px}
+.pa{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;padding:5px 6px;border-radius:7px;transition:.15s;font-weight:500}
+.pa:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.pa.liked{color:var(--red)}
+.live-dot{width:5px;height:5px;background:var(--red);border-radius:50%;display:inline-block;animation:ldp 1.5s infinite}
+@keyframes ldp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.8)}}
+.badge-live{display:inline-flex;align-items:center;gap:4px;background:rgba(255,45,45,.1);border:1px solid rgba(255,45,45,.2);color:var(--red);font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px;letter-spacing:.5px}
+
+.lcard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s;margin-bottom:8px}
+.lcard:hover{border-color:rgba(255,45,45,.25);transform:translateY(-2px)}
+.lc-th{height:90px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
+.lc-live{position:absolute;top:7px;left:7px;background:var(--red);color:#fff;font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:4px}
+.lc-vw{position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px}
+.lc-info{padding:9px 11px}
+.lc-name{font-size:12px;font-weight:700}
+.lc-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+.rp-t{font-family:var(--alt);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.sa{display:flex;gap:9px;align-items:center;padding:7px 0;cursor:pointer;border-bottom:1px solid var(--border)}
+.sa:last-child{border:none}
+.sa-av{width:33px;height:33px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--alt)}
+.sa-info{flex:1;min-width:0}
+.sa-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa-genre{font-size:9px;color:var(--muted)}
+.sa-fol{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 10px;font-size:9px;font-weight:600;cursor:pointer;transition:.15s;flex-shrink:0}
+.sa-fol:hover,.sa-fol.on{border-color:var(--y);color:var(--y)}
+.ttag{display:inline-block;background:rgba(232,255,0,.06);border:1px solid rgba(232,255,0,.12);color:var(--y);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;margin:3px;cursor:pointer;transition:.2s}
+.ttag:hover{background:rgba(232,255,0,.14)}
+
+.ap-banner{height:180px;position:relative;overflow:hidden;background:var(--bg3)}
+.ap-bg-grad{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--bg) 100%)}
+.ap-info{padding:0 20px 0;margin-top:-52px;position:relative;z-index:1}
+.ap-av-row{display:flex;align-items:flex-end;gap:14px;margin-bottom:14px}
+.ap-av{width:88px;height:88px;border-radius:50%;border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:34px;flex-shrink:0;color:#000}
+.ap-name{font-family:var(--head);font-size:30px;letter-spacing:3px;line-height:1}
+.ap-handle{font-size:11px;color:var(--muted);margin-top:3px}
+.ap-stats{display:flex;gap:18px;margin:10px 0}
+.ap-sn{font-size:14px;font-weight:700}
+.ap-sl{font-size:10px;color:var(--muted)}
+.ap-bio{font-size:12px;color:rgba(250,250,250,.65);line-height:1.55;margin-bottom:14px;max-width:480px}
+.ap-acts{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.ap-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:0}
+.ap-tab{padding:10px 16px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;letter-spacing:.3px}
+.ap-tab.on{color:var(--y);border-bottom-color:var(--y)}
+.ap-tc{padding:14px 20px 60px}
+
+.track-i{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:.15s;cursor:pointer}
+.track-i:hover{border-color:rgba(232,255,0,.15)}
+.tplay{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:none;transition:.2s;cursor:pointer;color:#000}
+.track-info{flex:1;min-width:0}
+.track-t{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-m{font-size:10px;color:var(--muted)}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+.pcard{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px;text-align:center;cursor:pointer;transition:.2s}
+.pcard:hover{border-color:rgba(232,255,0,.2);transform:translateY(-2px)}
+.pc-ic{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;font-weight:700;font-size:13px}
+.pc-name{font-size:11px;font-weight:600;margin-bottom:2px}
+.pc-type{font-size:9px;color:var(--muted);margin-bottom:7px}
+.pc-price{font-family:var(--head);font-size:18px;color:var(--y)}
+
+.tcket{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:7px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:.2s}
+.tcket:hover{border-color:rgba(232,255,0,.18)}
+.tc-dt{width:44px;height:52px;background:var(--y);border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:#000}
+.tc-mo{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.tc-dy{font-family:var(--head);font-size:22px;line-height:1}
+.tc-info{flex:1}
+.tc-tt{font-size:12px;font-weight:700}
+.tc-ve{font-size:10px;color:var(--muted);margin-top:2px}
+.tc-pr{font-family:var(--head);font-size:18px;color:var(--y)}
+
+.tip-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:center;margin-bottom:14px}
+.tip-tt{font-family:var(--alt);font-size:14px;font-weight:700;margin-bottom:5px}
+.tip-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.tip-amts{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.tamt{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);color:var(--green);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+.tamt:hover,.tamt.on{background:rgba(0,255,136,.16);border-color:var(--green)}
+.ca-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,#00C853,#009640);color:#fff;border:none;border-radius:8px;padding:12px 26px;font-size:13px;font-weight:700;cursor:pointer;width:100%;max-width:300px;margin:0 auto;transition:.2s}
+.ca-btn:hover{box-shadow:0 4px 16px rgba(0,200,83,.25);transform:translateY(-1px)}
+
+.dc{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.dc-t{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+.dinp{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--txt);font-size:12px;outline:none;margin-bottom:9px;transition:.2s;box-sizing:border-box}
+.dinp:focus{border-color:var(--y)}
+.dinp-l{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:block}
+.dtab-row{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.dtab{background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 12px;font-size:10px;font-weight:600;cursor:pointer;transition:.2s}
+.dtab:hover{border-color:var(--y);color:var(--y)}
+.dtab.on{background:rgba(232,255,0,.07);border-color:var(--y);color:var(--y)}
+.irow{display:flex;align-items:center;gap:9px;padding:9px;background:var(--bg4);border-radius:6px;margin-bottom:5px}
+.irow-m{flex:1;min-width:0}
+.irow-t{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.irow-s{font-size:10px;color:var(--muted)}
+.bl{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.15);color:var(--green);font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px}
+.bp{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.15);color:var(--orange);font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px}
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+
+.ai-modes{display:flex;gap:4px;flex-wrap:wrap}
+.amode{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:4px 11px;font-size:9px;font-weight:600;cursor:pointer;transition:.15s;letter-spacing:.3px;text-transform:uppercase}
+.amode.on{background:rgba(232,255,0,.07);border-color:var(--y);color:var(--y)}
+.ai-msgs{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+.ai-msgs::-webkit-scrollbar{display:none}
+.amsg{display:flex;gap:7px;align-items:flex-start}
+.amsg.u{flex-direction:row-reverse}
+.aav{width:25px;height:25px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.aav.b{background:rgba(232,255,0,.09);border:1px solid rgba(232,255,0,.18);color:var(--y)}
+.aav.u{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--txt)}
+.abub{max-width:82%;padding:9px 12px;border-radius:11px;font-size:12px;line-height:1.58;white-space:pre-wrap}
+.abub.b{background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:2px}
+.abub.u{background:rgba(232,255,0,.06);border:1px solid rgba(232,255,0,.1);border-bottom-right-radius:2px}
+.adots{display:flex;gap:3px;padding:2px 0}
+.adots span{width:5px;height:5px;background:var(--y);border-radius:50%;animation:dot 1.2s infinite both}
+.adots span:nth-child(2){animation-delay:.2s}
+.adots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.ai-inp-row{padding:9px 12px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:7px;align-items:flex-end;flex-shrink:0}
+.afield{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--txt);font-size:12px;outline:none;resize:none;line-height:1.4;max-height:100px}
+.afield:focus{border-color:var(--y)}
+.asend{width:30px;height:30px;border-radius:50%;background:var(--y);border:none;color:#000;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+.bl-top{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;background:var(--bg2)}
+.bl-logo{font-family:var(--head);font-size:16px;letter-spacing:3px;color:var(--blue);flex-shrink:0}
+.bpm-n{font-family:var(--head);font-size:18px;color:var(--blue);width:42px;text-align:center}
+.bpm-b{background:var(--bg4);border:1px solid var(--border);color:var(--txt);width:20px;height:20px;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.bpm-b:hover{border-color:var(--blue);color:var(--blue)}
+.ksel{background:var(--bg3);border:1px solid var(--border);color:var(--txt);border-radius:4px;padding:4px 7px;font-size:10px;outline:none}
+.bl-play{background:linear-gradient(135deg,var(--blue),#0099cc);color:#000;border:none;border-radius:4px;padding:5px 14px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+.bl-play.stp{background:linear-gradient(135deg,var(--red),#aa0000);color:#fff}
+.gbtn{background:var(--bg4);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 9px;font-size:9px;font-weight:600;cursor:pointer;transition:.15s}
+.gbtn:hover,.gbtn.on{background:rgba(0,212,255,.07);border-color:var(--blue);color:var(--blue)}
+.sl{-webkit-appearance:none;width:100%;height:2px;border-radius:1px;background:var(--muted2);outline:none}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;border-radius:50%;background:var(--blue);cursor:pointer}
+.seq-row{display:grid;grid-template-columns:48px 1fr;gap:5px;align-items:center;margin-bottom:3px}
+.sn{font-size:7px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;text-align:right}
+.ssteps{display:flex;gap:2px}
+.stp{flex:1;min-width:14px;height:22px;border-radius:2px;background:var(--bg4);border:1px solid rgba(255,255,255,.04);cursor:pointer;transition:.07s}
+.stp:hover{border-color:rgba(0,212,255,.28)}
+.stp.on{background:var(--blue);border-color:var(--blue);box-shadow:0 0 4px rgba(0,212,255,.25)}
+.stp.on.r{background:var(--red);border-color:var(--red);box-shadow:0 0 4px rgba(255,45,45,.25)}
+.stp.on.y{background:var(--y);border-color:var(--y);box-shadow:0 0 4px rgba(232,255,0,.25)}
+.stp.on.g{background:var(--green);border-color:var(--green);box-shadow:0 0 4px rgba(0,255,136,.25)}
+.stp.on.p{background:var(--purple);border-color:var(--purple);box-shadow:0 0 4px rgba(155,89,255,.25)}
+.stp.cur{outline:1px solid rgba(255,255,255,.4);outline-offset:-1px}
+.stp.b4{border-left-color:rgba(255,255,255,.1)!important}
+.vbar{flex:1;border-radius:1px;background:var(--blue);opacity:.5;transition:height .07s}
+.gbtn-r{background:linear-gradient(135deg,var(--purple),#7322bb);color:#fff;border:none;border-radius:6px;padding:9px;font-weight:700;font-size:10px;letter-spacing:.5px;cursor:pointer;width:100%;transition:.2s;margin-top:4px}
+.gbtn-r:hover{box-shadow:0 0 14px rgba(155,89,255,.3)}
+.gbtn-r:disabled{opacity:.5;cursor:not-allowed}
+.lbtn{background:linear-gradient(135deg,var(--red),#990000);color:#fff;border:none;border-radius:6px;padding:9px;font-weight:700;font-size:10px;letter-spacing:.5px;cursor:pointer;width:100%;transition:.2s;margin-top:5px}
+
+#botnav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(5,5,7,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:200;height:56px;padding:0 4px}
+@media(max-width:600px){#botnav{display:flex;align-items:center;justify-content:space-around}#app{grid-template-rows:var(--nav) 1fr 56px}}
+.bnav{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;color:var(--muted);cursor:pointer;font-size:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;flex:1;border:none;background:none;transition:.15s}
+.bnav.on{color:var(--y)}
+.bnav-ic{font-size:16px;margin-bottom:1px}
+
+/* Real feel improvements */
+.view{animation:none}
+.view.on{animation:viewin .2s ease}
+@keyframes viewin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.post{position:relative}
+.post::after{content:'';position:absolute;left:0;bottom:0;right:0;height:1px;background:var(--border)}
+.tplay:active{transform:scale(.92)}
+.btn:focus{outline:none}
+input:focus,textarea:focus,select:focus{outline:none}
+.sib-i{user-select:none}
+.pa:active{transform:scale(.92)}
+.pav:active,.ap-av:active{transform:scale(.94)}
+.lcard:active{transform:scale(.98)}
+.pcard:active{transform:scale(.97)}
+.acard:active{transform:scale(.97)}
+/* Smoother scrolling */
+#center,#rp,#sidebar{scroll-behavior:smooth}
+/* Better modal backdrop */
+.mwrap{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* Pulse on live badge */
+.badge-live{animation:livebadge 2s infinite}
+@keyframes livebadge{0%,100%{opacity:1}50%{opacity:.7}}
+/* Better input focus states */
+.fl input:focus,.fl select:focus,.fl textarea:focus,.dinp:focus,.afield:focus{box-shadow:0 0 0 2px rgba(232,255,0,.08)}
+/* Smoother hover on artist cards */
+.lcard,.pcard{will-change:transform}
+/* Beat step active feel */
+.stp:active{transform:scale(.88)}
+/* Real scrollbar for feed */
+#center::-webkit-scrollbar{width:3px}
+#center::-webkit-scrollbar-thumb{background:rgba(232,255,0,.2);border-radius:2px}
+/* Nav active state */
+.nbtn:active{transform:scale(.96)}
+/* Green cashapp button pulse */
+.ca-btn{position:relative;overflow:hidden}
+.ca-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08);opacity:0;transition:.2s}
+.ca-btn:active::after{opacity:1}
+</style>
+</head>
+<body>
+<div id="ld"><div class="ld-logo">ARTIST EMPIRE</div><div class="ld-sub">The Indie Artist Ecosystem</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
+<div id="toasts"></div>
+<div id="app">
+<div id="tnav">
+  <div class="tn-logo" onclick="sv('home')">AE</div>
+  <div class="tn-search"><input placeholder="Search artists, music, events..." oninput="searchQ(this.value)" onkeydown="if(event.key==='Escape')this.value=''"/></div>
+  <div class="tn-r">
+    <div id="tn-user"><span class="tn-plan" id="tn-plan">ARTIST</span><div class="tn-av" id="tn-av" onclick="sv('dash')">?</div><button class="nbtn" onclick="doOut()">Out</button></div>
+    <div id="tn-auth"><button class="nbtn" onclick="openM('signin')" style="margin-right:5px">Sign In</button><button class="nbtn pri" onclick="sv('pricing')">Join Now</button></div>
+  </div>
+</div>
+<div id="body">
+<div id="sidebar">
+  <div class="sib-sec">Discover</div>
+  <div class="sib-i on" onclick="sv('home')" id="si-home"><span class="sib-ic">H</span>Home Feed</div>
+  <div class="sib-i" onclick="sv('live')" id="si-live"><span class="sib-ic">L</span>Live Now<span class="sib-badge">4</span></div>
+  <div class="sib-i" onclick="sv('artists')" id="si-artists"><span class="sib-ic">A</span>Artists</div>
+  <div class="sib-i" onclick="sv('beats')" id="si-beats"><span class="sib-ic">B</span>Beat Market</div>
+  <div class="sib-sec">Create</div>
+  <div class="sib-i" onclick="sv('beatlab')" id="si-beatlab"><span class="sib-ic">*</span>Beat Lab AI</div>
+  <div class="sib-i" onclick="sv('ai')" id="si-ai"><span class="sib-ic">~</span>AI Tools</div>
+  <div class="sib-sec">You</div>
+  <div class="sib-i" onclick="reqAuth('dash')" id="si-dash"><span class="sib-ic">D</span>Dashboard</div>
+  <div class="sib-i" onclick="reqAuth('mypage')" id="si-mypage"><span class="sib-ic">P</span>My Page</div>
+  <div class="sib-sec">Plans</div>
+  <div class="sib-i" onclick="sv('pricing')" id="si-pricing"><span class="sib-ic">$</span>Pricing</div>
+</div>
+<div id="center">
+<div class="view on" id="v-home">
+  <div id="home-hero" style="display:none;text-align:center;padding:60px 24px 20px;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(232,255,0,.06),transparent 70%)"></div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--y);margin-bottom:16px;position:relative;z-index:1">The Indie Artist Ecosystem</div>
+    <h1 style="font-family:var(--head);font-size:clamp(64px,14vw,180px);line-height:.88;letter-spacing:2px;background:linear-gradient(135deg,#fff 0%,#fff 30%,var(--y) 65%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1">OWN YOUR<br>EMPIRE</h1>
+    <p style="font-size:clamp(13px,1.8vw,17px);color:var(--muted);max-width:500px;margin:18px auto 0;line-height:1.65;font-weight:300;position:relative;z-index:1">Sell music, merch, and tickets. Live stream to your fans. <strong style="color:var(--txt);font-weight:600">Keep 90% of every dollar</strong> — no labels, no middlemen.</p>
+    <div style="display:flex;gap:10px;margin-top:28px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1">
+      <button class="btn btn-y" onclick="openM('signup')">Start Building</button>
+      <button class="btn btn-out" onclick="sv('artists')">Browse Artists</button>
+      <button class="btn btn-ghost" onclick="sv('live')">Watch Live</button>
+    </div>
+    <div style="display:flex;gap:28px;margin-top:40px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1">
+      <div style="text-align:center"><div style="font-family:var(--head);font-size:32px;color:var(--y)">90%</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Artist Cut</div></div>
+      <div style="text-align:center"><div style="font-family:var(--head);font-size:32px;color:var(--y)">$0</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Label Cut</div></div>
+      <div style="text-align:center"><div style="font-family:var(--head);font-size:32px;color:var(--y)">Live</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Streaming</div></div>
+      <div style="text-align:center"><div style="font-family:var(--head);font-size:32px;color:var(--y)">Direct</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Fan Payment</div></div>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:20px 0 4px;justify-content:center;scrollbar-width:none" id="hero-artists"></div>
+  </div>
+  <div class="feed-wrap" id="main-feed"></div>
+</div>
+<div class="view" id="v-live"><div style="padding:14px;max-width:640px;margin:0 auto"><div style="display:flex;align-items:center;gap:7px;margin-bottom:14px"><span class="badge-live"><span class="live-dot"></span>LIVE NOW</span><span style="font-size:11px;color:var(--muted)">4 streams active</span></div><div id="live-grid"></div></div></div>
+<div class="view" id="v-artists"><div style="padding:14px;max-width:640px;margin:0 auto"><div style="font-family:var(--head);font-size:26px;letter-spacing:2px;margin-bottom:12px">ALL ARTISTS</div><input id="asearch" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 13px;color:var(--txt);font-size:12px;outline:none;width:100%;max-width:360px;display:block;margin-bottom:14px" placeholder="Search artists..." oninput="filterA(this.value)"/><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px" id="artists-grid"></div></div></div>
+<div class="view" id="v-beats"><div style="padding:14px;max-width:640px;margin:0 auto"><div style="font-family:var(--head);font-size:26px;letter-spacing:2px;margin-bottom:4px">BEAT MARKET</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px">Buy beats direct from producers. 90% goes to them.</div><div id="beats-grid"></div></div></div>
+<div class="view" id="v-artist"><div id="artist-content"></div></div>
+<div class="view" id="v-pricing">
+  <div style="padding:22px 14px;max-width:820px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:28px"><div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--y);margin-bottom:7px">Simple Pricing</div><div style="font-family:var(--head);font-size:44px;letter-spacing:2px;line-height:1">BUILD YOUR EMPIRE</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Your subscription funds the platform. Fans fund you — you keep 90%.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:26px;transition:.2s" onmouseover="this.style.borderColor='rgba(232,255,0,.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="font-family:var(--head);font-size:22px;letter-spacing:2px;margin-bottom:5px">ARTIST</div>
+        <div style="font-family:var(--head);font-size:44px;color:var(--y);line-height:1">$20</div><div style="font-size:11px;color:var(--muted);margin:3px 0 12px">per month</div>
+        <ul style="list-style:none;margin-bottom:20px;display:flex;flex-direction:column;gap:6px">
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Your own artist page</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Sell music direct to fans</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Sell merch and tickets</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Live stream performances</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Fan tips and gifting</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>AI beat maker and lyrics</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--green);font-weight:700">+</span>Keep 90% of all sales</li>
+        </ul>
+        <a href="https://buy.stripe.com/4gM8wPcdx6kmaICfkf3VC00" target="_blank" class="btn btn-out btn-full">GET STARTED</a>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(232,255,0,.04),var(--bg2));border:1px solid rgba(232,255,0,.28);border-radius:13px;padding:26px;position:relative">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--y);color:#000;font-size:8px;font-weight:700;letter-spacing:2px;padding:2px 12px;border-radius:20px;white-space:nowrap">MOST POPULAR</div>
+        <div style="font-family:var(--head);font-size:22px;letter-spacing:2px;margin-bottom:5px">LABEL</div>
+        <div style="font-family:var(--head);font-size:44px;color:var(--y);line-height:1">$40</div><div style="font-size:11px;color:var(--muted);margin:3px 0 12px">per month</div>
+        <ul style="list-style:none;margin-bottom:20px;display:flex;flex-direction:column;gap:6px">
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Everything in Artist</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Up to 10 artist pages</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Label dashboard</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Roster management</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Revenue split tracking</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--y);font-weight:700">+</span>Priority support</li>
+        </ul>
+        <a href="https://buy.stripe.com/bJe14n5P9aAC4ke6NJ3VC01" target="_blank" class="btn btn-y btn-full">GET STARTED</a>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:26px;transition:.2s" onmouseover="this.style.borderColor='rgba(232,255,0,.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="font-family:var(--head);font-size:22px;letter-spacing:2px;margin-bottom:5px">EMPIRE</div>
+        <div style="font-family:var(--head);font-size:44px;color:var(--y);line-height:1">$99</div><div style="font-size:11px;color:var(--muted);margin:3px 0 12px">per month</div>
+        <ul style="list-style:none;margin-bottom:20px;display:flex;flex-direction:column;gap:6px">
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>Everything in Label</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>Unlimited artist pages</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>Sync licensing marketplace</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>Beat marketplace listing</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>Dedicated manager</li>
+          <li style="font-size:11px;display:flex;gap:6px"><span style="color:var(--blue);font-weight:700">+</span>White-label pages</li>
+        </ul>
+        <a href="https://buy.stripe.com/14A28relF7oqg2W2xt3VC03" target="_blank" class="btn btn-out btn-full">GET STARTED</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">Secure checkout via Stripe. Page activates automatically after payment.</div>
+  </div>
+</div>
+<div class="view" id="v-dash"><div id="dash-wrap" style="padding:18px;max-width:720px;margin:0 auto"></div></div>
+<div class="view" id="v-mypage"><div id="mypage-wrap"></div></div>
+<div class="view" id="v-ai" style="height:100%;display:flex;flex-direction:column">
+  <div style="padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="font-family:var(--alt);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--y);margin-bottom:8px">AI EMPIRE</div>
+    <div class="ai-modes">
+      <button class="amode on" id="am-chat" onclick="setAIM('chat')">Music Chat</button>
+      <button class="amode" id="am-lyrics" onclick="setAIM('lyrics')">Lyrics</button>
+      <button class="amode" id="am-beats" onclick="setAIM('beats')">Beat Ideas</button>
+      <button class="amode" id="am-biz" onclick="setAIM('biz')">Biz Advisor</button>
+    </div>
+  </div>
+  <div class="ai-msgs" id="ai-msgs" style="flex:1"></div>
+  <div class="ai-inp-row"><textarea class="afield" id="ai-inp" placeholder="Ask anything..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"></textarea><button class="asend" onclick="sendAI()">&#10148;</button></div>
+</div>
+<div class="view" id="v-beatlab" style="height:100%;display:grid;grid-template-columns:1fr 280px;overflow:hidden">
+  <div style="display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)">
+    <div class="bl-top">
+      <div class="bl-logo">BEAT LAB</div>
+      <div style="display:flex;align-items:center;gap:5px"><button class="bpm-b" onclick="chBPM(-1)">-</button><div class="bpm-n" id="bpm-n">140</div><button class="bpm-b" onclick="chBPM(1)">+</button></div>
+      <select class="ksel" id="bl-key"><option>A Minor</option><option>C Major</option><option>G Major</option><option>D Minor</option><option>E Minor</option><option>F Major</option><option>G Minor</option><option>C Minor</option></select>
+      <button class="bl-play" id="bl-play" onclick="togPlay()">PLAY</button>
+      <button class="bpm-b" style="width:auto;padding:0 7px;font-size:9px" onclick="clrBeat()">CLR</button>
+      <div style="flex:1"></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+      <div><div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Genre</div><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="gbtn on" onclick="selG(this,'Trap')">Trap</button><button class="gbtn" onclick="selG(this,'Drill')">Drill</button><button class="gbtn" onclick="selG(this,'Boom Bap')">Boom Bap</button><button class="gbtn" onclick="selG(this,'R&B')">R&B</button><button class="gbtn" onclick="selG(this,'Afrobeats')">Afrobeats</button><button class="gbtn" onclick="selG(this,'Lo-Fi')">Lo-Fi</button><button class="gbtn" onclick="selG(this,'Gospel')">Gospel</button><button class="gbtn" onclick="selG(this,'Jersey Club')">Jersey</button></div></div>
+      <div><div style="font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Mix</div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px"><span>Bass</span><span id="sv-bass">70%</span></div><input type="range" class="sl" min="0" max="100" value="70" oninput="upSl('bass',this.value)"/>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:6px 0 2px"><span>Hi-Hats</span><span id="sv-hihat">60%</span></div><input type="range" class="sl" min="0" max="100" value="60" oninput="upSl('hihat',this.value)"/>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:6px 0 2px"><span>Reverb</span><span id="sv-reverb">35%</span></div><input type="range" class="sl" min="0" max="100" value="35" oninput="upSl('reverb',this.value)"/>
+      </div>
+      <div style="height:24px;display:flex;gap:1px;align-items:center" id="viz-wrap"></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px;overflow-x:auto"><div id="seq-wrap"></div></div>
+      <button class="gbtn-r" id="gen-btn" onclick="genBeat()">GENERATE BEAT WITH AI</button>
+      <button class="lbtn" onclick="genLyrics()">WRITE LYRICS FOR THIS BEAT</button>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0">AI BEAT AGENT</div>
+    <div class="ai-msgs" id="bai-msgs" style="flex:1"></div>
+    <div class="ai-inp-row"><textarea class="afield" id="bai-inp" placeholder="Describe your beat..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendBAI()}"></textarea><button class="asend" onclick="sendBAI()">&#10148;</button></div>
+  </div>
+</div>
+</div>
+<div id="rp">
+  <div class="rp-t">Live Now</div><div id="rp-live"></div>
+  <div style="height:14px"></div>
+  <div class="rp-t">Suggested Artists</div><div id="rp-suggest"></div>
+  <div style="height:14px"></div>
+  <div class="rp-t">Trending</div><div id="rp-trending"></div>
+</div>
+</div>
+</div>
+<div id="botnav">
+  <button class="bnav on" onclick="sv('home')" id="bn-home"><div class="bnav-ic">H</div>Home</button>
+  <button class="bnav" onclick="sv('live')" id="bn-live"><div class="bnav-ic">L</div>Live</button>
+  <button class="bnav" onclick="sv('beatlab')" id="bn-beatlab"><div class="bnav-ic">B</div>Beats</button>
+  <button class="bnav" onclick="sv('ai')" id="bn-ai"><div class="bnav-ic">AI</div>AI</button>
+  <button class="bnav" onclick="reqAuth('dash')" id="bn-dash"><div class="bnav-ic">D</div>Dash</button>
+</div>
+<div class="mwrap" id="m-signin"><div class="modal"><button class="mcl" onclick="closeM('signin')" aria-label="Close">&times;</button><div class="mh">SIGN IN</div><div class="ms">Access your Artist Empire dashboard</div><div class="fl"><label>Email</label><input type="email" id="si-em" placeholder="your@email.com"/></div><div class="fl"><label>Password</label><input type="password" id="si-pw" placeholder="Password"/></div><button class="btn btn-y btn-full" style="margin-bottom:9px" onclick="doIn()">SIGN IN</button><button class="btn btn-ghost btn-full" onclick="closeM('signin');openM('signup')">Create Account</button></div></div>
+<div class="mwrap" id="m-signup"><div class="modal"><button class="mcl" onclick="closeM('signup')" aria-label="Close">&times;</button><div class="mh">JOIN THE EMPIRE</div><div class="ms">Create your creator account</div><div class="fl"><label>Full Name</label><input type="text" id="su-nm" placeholder="Your name"/></div><div class="fl"><label>Artist / Creator Name</label><input type="text" id="su-ar" placeholder="Stage name or brand"/></div><div class="fl"><label>CashApp Tag</label><input type="text" id="su-ca" placeholder="$yourname" style="color:var(--green)"/></div><div class="fl"><label>Email</label><input type="email" id="su-em" placeholder="your@email.com"/></div><div class="fl"><label>Password (min 6 chars)</label><input type="password" id="su-pw" placeholder="Password"/></div><div class="fl"><label>Plan</label><select id="su-pl"><option value="artist">Artist — $20/mo</option><option value="label">Label — $40/mo</option><option value="empire">Empire — $99/mo</option></select></div><button class="btn btn-y btn-full" style="margin-bottom:9px" onclick="doUp()">CREATE ACCOUNT + PAY</button><button class="btn btn-ghost btn-full" onclick="closeM('signup');openM('signin')">Already have account</button></div></div>
+<script>
+var SB_URL='https://noxyzfvcqifsyyciemlo.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5veHl6ZnZjcWlmc3l5Y2llbWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2Mzc4NjIsImV4cCI6MjA5NDIxMzg2Mn0.04gVAB1ujG8QTDW50j6GmIeqdcwjrWEjtVfVz_UGTto';
+var STRIPE={artist:'https://buy.stripe.com/4gM8wPcdx6kmaICfkf3VC00',label:'https://buy.stripe.com/bJe14n5P9aAC4ke6NJ3VC01',empire:'https://buy.stripe.com/14A28relF7oqg2W2xt3VC03'};
+var sb=window.supabase.createClient(SB_URL,SB_KEY);
+var ST={user:null,prof:null,view:'home',aim:'chat',bai:'beat',genre:'Trap',bpm:140,steps:16,playing:false,step:-1,timer:null,aiH:[],baiH:[]};
+
+var ARTISTS=[
+  {n:'HOODSTAR365',h:'hoodstar365',ca:'$hsw365',bio:'Founder of Artist Empire. Independent artist and label owner. HSW365 Media. No label. No middleman.',genre:'Hip-Hop',c1:'#E8FF00',c2:'#b8cc00',tracks:['Empire State of Mind','Hustle Hard','365 Days','Paper Route','No Permission'],prods:[{n:'Beat Pack Vol.1',t:'Beats',p:29},{n:'Stem Pack',t:'Stems',p:15},{n:'HSW365 Hoodie',t:'Merch',p:45},{n:'1-on-1 Session',t:'Service',p:99}],tix:[{tt:'HSW365 Live Experience',v:'Virtual Livestream',d:'JUN',dy:'14',p:15},{tt:'Studio Session Access',v:'Watch Live',d:'JUL',dy:'4',p:25}],fans:12400,sales:847},
+  {n:'STREETVIBE',h:'streetvibe',ca:'$streetvibe',bio:'Raw. Unfiltered. Real. Trap out of Atlanta.',genre:'Trap',c1:'#FF6B00',c2:'#cc4400',tracks:['No Filter','Street Dreams','Grind Season','Paid in Full'],prods:[{n:'Trap Beat Pack',t:'Beats',p:25},{n:'Exclusive Verse',t:'Service',p:150}],tix:[{tt:'Street Sessions Live',v:'Virtual Livestream',d:'JUN',dy:'20',p:10}],fans:8200,sales:312},
+  {n:'WAVEKNG',h:'wavekng',ca:'$wavekng',bio:'Melodic R&B. Every note from the soul.',genre:'R&B',c1:'#00D4FF',c2:'#0099cc',tracks:['Ocean','Waves','Deep','Still Here'],prods:[{n:'R&B Instrumentals',t:'Beats',p:20},{n:'Feature Verse',t:'Service',p:175}],tix:[{tt:'Wave Sessions',v:'Virtual Studio',d:'JUL',dy:'1',p:12}],fans:6100,sales:218},
+  {n:'BEATQUEEN',h:'beatqueen',ca:'$beatqueen',bio:'Producer. Songwriter. Boss. Making hits independently.',genre:'Pop/R&B',c1:'#9B59FF',c2:'#7b22dd',tracks:['Queen Move','Level Up','Crown','Own It'],prods:[{n:'Custom Beat',t:'Beats',p:50},{n:'Songwriting Session',t:'Service',p:120}],tix:[{tt:'Beat Masterclass Live',v:'Virtual',d:'JUN',dy:'28',p:20}],fans:9300,sales:421},
+  {n:'GODFLOW',h:'godflow',ca:'$godflow',bio:'Gospel rap. Faith over fear.',genre:'Gospel',c1:'#00FF88',c2:'#00b85a',tracks:['Higher Ground','Faith Walk','Blessed','Purpose'],prods:[{n:'Gospel Beats',t:'Beats',p:20}],tix:[],fans:4500,sales:156},
+  {n:'DRILLKING',h:'drillking',ca:'$drillking',bio:'Drill music. No cap.',genre:'Drill',c1:'#FF2D2D',c2:'#990000',tracks:['No Cap','Pressure','Slide','Facts Only'],prods:[{n:'Drill Pack',t:'Beats',p:35}],tix:[{tt:'Drill Session Live',v:'Virtual',d:'JUL',dy:'10',p:8}],fans:7800,sales:289},
+  {n:'SOULCHILD',h:'soulchild',ca:'$soulchild',bio:'Neo-soul. Old school soul. New hustle.',genre:'Neo-Soul',c1:'#FF6B8A',c2:'#cc3355',tracks:['Soul Food','Real Love','Vibes','Morning'],prods:[{n:'Soul Sample Pack',t:'Stems',p:30},{n:'Feature',t:'Service',p:250}],tix:[],fans:5200,sales:198},
+  {n:'AFRO KING',h:'afroking',ca:'$afroking',bio:'Afrobeats. Global sound. Unstoppable.',genre:'Afrobeats',c1:'#FF6B00',c2:'#E8FF00',tracks:['Juju','Fire Dance','Lagos Nights','Vibe Check'],prods:[{n:'Afro Beat Pack',t:'Beats',p:30}],tix:[{tt:'Afrobeats Night',v:'Virtual',d:'AUG',dy:'1',p:15}],fans:11200,sales:534},
+];
+
+var POSTS=[
+  {id:1,h:'hoodstar365',c1:'#E8FF00',t:'2m',body:'New track dropping tonight. No label. No deal. Just music for the people.',tags:['#HSW365','#IndieArtist'],media:'audio',emoji:'&#9835;',likes:847,com:124,rep:203},
+  {id:2,h:'streetvibe',c1:'#FF6B00',t:'8m',body:'Studio session tonight at 9PM EST. Tickets on my page. Come watch me cook.',tags:['#Trap','#StudioLive'],media:'live',emoji:'&#128308;',likes:512,com:89,rep:167},
+  {id:3,h:'beatqueen',c1:'#9B59FF',t:'22m',body:'Beat pack just dropped. 20 bangers. Yours for $50 direct. No middleman.',tags:['#Beats','#Producer'],media:'prod',prod:{n:'Beat Pack Vol.3',t:'Beats',p:50,ca:'$beatqueen'},likes:334,com:67,rep:98},
+  {id:4,h:'wavekng',c1:'#00D4FF',t:'1h',body:'R&B fans this one is for you. Pure emotion. Stream free then buy the download.',tags:['#RnB','#NewMusic'],media:'audio',emoji:'&#127754;',likes:289,com:44,rep:71},
+  {id:5,h:'godflow',c1:'#00FF88',t:'2h',body:'The purpose is bigger than the platform. New gospel track. Pay what you can.',tags:['#Gospel','#Faith'],media:null,likes:445,com:88,rep:201},
+  {id:6,h:'drillking',c1:'#FF2D2D',t:'3h',body:'Virtual concert this Friday. Get your tickets now. Real performance, real energy.',tags:['#Drill','#Concert'],media:'tix',tix:{tt:'Drill Session Live',d:'JUL 10',p:8,ca:'$drillking'},likes:678,com:132,rep:344},
+  {id:7,h:'afroking',c1:'#FF6B00',t:'5h',body:'Lagos to the world. Afrobeats has no borders. New EP on my Artist Empire page.',tags:['#Afrobeats','#Global'],media:'audio',emoji:'&#127758;',likes:1203,com:247,rep:589},
+];
+
+var LIVE=[
+  {h:'streetvibe',c1:'#FF6B00',emoji:'&#128293;',viewers:'1.2K',title:'Studio Session — Cooking New Heat',price:10},
+  {h:'hoodstar365',c1:'#E8FF00',emoji:'&#9835;',viewers:'843',title:'Late Night Freestyle Session',price:0},
+  {h:'beatqueen',c1:'#9B59FF',emoji:'&#127929;',viewers:'567',title:'Beat Making Live — Watch me produce',price:15},
+  {h:'afroking',c1:'#FF6B00',emoji:'&#127758;',viewers:'2.1K',title:'Afrobeats Performance Night',price:12},
+];
+
+var PRESETS={
+  'Trap':{kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1],bass808:[1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0]},
+  'Drill':{kick:[1,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[1,1,0,1,1,0,1,1,0,1,1,0,1,0,1,1],bass808:[1,0,1,0,0,0,1,0,1,0,0,1,0,0,1,0]},
+  'Boom Bap':{kick:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],bass808:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
+  'R&B':{kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],hihat:[1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1],bass808:[1,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0]},
+  'Afrobeats':{kick:[1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0],snare:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],hihat:[1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0],bass808:[1,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0]},
+  'Lo-Fi':{kick:[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0],bass808:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]},
+  'Gospel':{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],hihat:[1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0],bass808:[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0]},
+  'Jersey Club':{kick:[1,0,0,1,1,0,0,0,1,0,0,1,1,0,0,0],snare:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],bass808:[1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0]},
+};
+
+var SEQT=[
+  {id:'kick',n:'KICK',col:'y',pat:new Array(16).fill(0)},
+  {id:'snare',n:'SNARE',col:'r',pat:new Array(16).fill(0)},
+  {id:'hihat',n:'HI-HAT',col:'b',pat:new Array(16).fill(0)},
+  {id:'clap',n:'CLAP',col:'g',pat:new Array(16).fill(0)},
+  {id:'bass808',n:'808',col:'g',pat:new Array(16).fill(0)},
+  {id:'melody',n:'MELODY',col:'p',pat:new Array(16).fill(0)},
+];
+
+var AISYS={
+  chat:'You are the Artist Empire AI for independent musicians and content creators. Help them monetize their craft, grow their fanbase, and build direct income from fans. Be real, direct, practical. Always favor the creator keeping their money and rights.',
+  lyrics:'You are an elite ghostwriter. Write complete songs with [Verse 1], [Hook], [Verse 2], [Bridge]. Match genre and vibe. Be vivid, authentic, and street-smart.',
+  beats:'You are a world-class music producer. Describe original beat blueprints — BPM, key, drum patterns, 808 notes, melodic elements, chord progressions, arrangement, mixing tips.',
+  biz:'You are a music and creator business expert. Cover monetization, fan relationships, brand deals, sync licensing, live streaming income, merch, direct fan payments, platform strategy, building independent empires.'
+};
+var BAISYS='You are an elite beat making AI inside Artist Empire Beat Lab. Generate detailed original beat blueprints — BPM, key, drum patterns, 808 notes, melodic elements, chord progressions, arrangement, mixing tips, artist references.';
+
+window.addEventListener('load',function(){
+  // Update timestamps every minute
+  setInterval(function(){
+    var times=['Just now','1m','2m','5m','12m','1h','2h','3h','5h'];
+    document.querySelectorAll('.phandle').forEach(function(el,i){
+      // Keep existing times - just make sure they display
+    });
+  },60000);
+  setTimeout(function(){var l=document.getElementById('ld');if(l)l.classList.add('out');},1600);
+  renderFeed();renderLive();renderArtists();renderBeats();renderRP();
+  initSeq();initViz();initAI();
+  checkSess();
+});
+
+async function checkSess(){
+  try{
+    var r=await sb.auth.getSession();
+    if(r.data&&r.data.session){ST.user=r.data.session.user;await loadProf();setNavIn();}
+    else{var h=document.getElementById('home-hero');if(h)h.style.display='block';}
+  }catch(e){}
+}
+
+async function doUp(){
+  var nm=g('su-nm'),ar=g('su-ar'),ca=g('su-ca'),em=g('su-em'),pw=g('su-pw'),pl=v('su-pl');
+  if(!nm||!em||!pw){toast('Fill all fields','err');return;}
+  if(pw.length<6){toast('Password needs 6+ characters','err');return;}
+  if(ca&&!ca.startsWith('$')){toast('CashApp must start with $','err');return;}
+  try{
+    var r=await sb.auth.signUp({email:em,password:pw,options:{data:{name:nm,artist_name:ar,cashapp:ca,plan:pl}}});
+    if(r.error)throw r.error;
+    ST.user=r.data.user;
+    if(r.data.user)await sb.from('profiles').upsert([{id:r.data.user.id,name:nm,artist_name:ar,cashapp:ca,plan:pl,email:em,created_at:new Date().toISOString()}]);
+    await loadProf();closeM('signup');setNavIn();
+    toast('Account created! Completing payment...','ok');
+    var prices={artist:20,label:40,empire:99};
+    setTimeout(function(){if(confirm('Pay $'+(prices[pl]||20)+'/month to activate your page?'))window.open(STRIPE[pl]||STRIPE.artist,'_blank');},500);
+  }catch(e){toast(e.message||'Signup failed','err');}
+}
+
+async function doIn(){
+  var em=g('si-em'),pw=g('si-pw');
+  if(!em||!pw){toast('Enter email and password','err');return;}
+  try{
+    var r=await sb.auth.signInWithPassword({email:em,password:pw});
+    if(r.error)throw r.error;
+    ST.user=r.data.user;await loadProf();closeM('signin');setNavIn();
+    var h=document.getElementById('home-hero');if(h)h.style.display='none';
+    toast('Welcome back!','ok');
+  }catch(e){toast(e.message||'Sign in failed','err');}
+}
+
+async function doOut(){
+  await sb.auth.signOut();ST.user=null;ST.prof=null;
+  var tu=document.getElementById('tn-user'),ta=document.getElementById('tn-auth');
+  if(tu)tu.classList.remove('on');if(ta)ta.style.display='flex';
+  var h=document.getElementById('home-hero');if(h)h.style.display='block';
+  toast('Signed out');
+}
+
+async function loadProf(){
+  if(!ST.user)return;
+  var r=await sb.from('profiles').select('*').eq('id',ST.user.id).single();
+  if(r.data)ST.prof=r.data;
+}
+
+function setNavIn(){
+  var u=ST.prof||(ST.user&&ST.user.user_metadata)||{};
+  var tu=document.getElementById('tn-user'),ta=document.getElementById('tn-auth');
+  var av=document.getElementById('tn-av'),pl=document.getElementById('tn-plan');
+  if(tu)tu.classList.add('on');if(ta)ta.style.display='none';
+  if(av)av.textContent=((u.artist_name||u.name||'U')[0]||'U').toUpperCase();
+  if(pl)pl.textContent=(u.plan||'ARTIST').toUpperCase();
+}
+
+function sv(name){
+  ST.view=name;
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  var el=document.getElementById('v-'+name);if(el)el.classList.add('on');
+  document.querySelectorAll('.sib-i').forEach(function(i){i.classList.remove('on');});
+  var si=document.getElementById('si-'+name);if(si)si.classList.add('on');
+  document.querySelectorAll('.bnav').forEach(function(b){b.classList.remove('on');});
+  var bn=document.getElementById('bn-'+name);if(bn)bn.classList.add('on');
+  var c=document.getElementById('center');if(c)c.scrollTop=0;
+  if(name==='dash')renderDash();
+  if(name==='mypage')renderMyPage();
+}
+
+function reqAuth(name){if(!ST.user){openM('signin');return;}sv(name);}
+
+function renderFeed(){
+  var el=document.getElementById('main-feed');if(!el)return;
+  el.innerHTML=POSTS.map(function(p){
+    var a=ARTISTS.find(function(x){return x.h===p.h;})||{n:p.h.toUpperCase(),c1:p.c1};
+    var med='';
+    if(p.media==='audio'){
+      med='<div class="pmedia" style="background:linear-gradient(135deg,'+p.c1+'11,var(--bg4))" onclick="toast(\'Playing...\',\'ok\')"><span style="font-size:48px;line-height:1">'+p.emoji+'</span></div>';
+    }else if(p.media==='live'){
+      med='<div class="pmedia" style="background:linear-gradient(135deg,#ff000011,var(--bg4))" onclick="openLive(\''+p.h+'\')"><div class="pmedia-badge">LIVE</div><span style="font-size:40px;color:var(--red)">R</span></div>';
+    }else if(p.media==='prod'&&p.prod){
+      med='<div class="pprod" onclick="cashApp(\''+p.prod.ca+'\',\''+p.prod.n+'\','+p.prod.p+')"><div class="pprod-ic">B</div><div class="pprod-info"><div class="pprod-name">'+p.prod.n+'</div><div class="pprod-type">'+p.prod.t+'</div><div class="pprod-price">$'+p.prod.p+'</div></div><button class="pprod-btn" onclick="event.stopPropagation();cashApp(\''+p.prod.ca+'\',\''+p.prod.n+'\','+p.prod.p+')">BUY</button></div>';
+    }else if(p.media==='tix'&&p.tix){
+      med='<div class="pprod" onclick="cashApp(\''+p.tix.ca+'\',\''+p.tix.tt+'\','+p.tix.p+')"><div class="pprod-ic" style="background:var(--y);color:#000;font-weight:700;font-size:10px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:7px">'+p.tix.d+'</div><div class="pprod-info"><div class="pprod-name">'+p.tix.tt+'</div><div class="pprod-type">Live Ticket</div><div class="pprod-price">$'+p.tix.p+'</div></div><button class="pprod-btn" onclick="event.stopPropagation();cashApp(\''+p.tix.ca+'\',\''+p.tix.tt+'\','+p.tix.p+')">BUY</button></div>';
+    }
+    return '<div class="post"><div class="ph"><div class="pav" style="background:linear-gradient(135deg,'+p.c1+'22,'+p.c1+'44);color:'+p.c1+'" onclick="openArtist(\''+p.h+'\')">'+a.n[0]+'</div><div class="pm"><div class="pname" onclick="openArtist(\''+p.h+'\')">'+a.n+'</div><div class="phandle">@'+p.h+' · '+p.t+'</div></div></div>'
+      +'<div class="pbody">'+p.body+'<br>'+p.tags.map(function(t){return '<span class="ptag">'+t+'</span>';}).join(' ')+'</div>'
+      +med
+      +'<div class="pactions"><button class="pa" onclick="likeP(this,'+p.id+')">&#9825; '+fmt(p.likes)+'</button><button class="pa">&#9657; '+fmt(p.com)+'</button><button class="pa">&#8635; '+fmt(p.rep)+'</button><button class="pa" style="margin-left:auto;color:var(--y)" onclick="tipA(\''+p.h+'\')">Tip</button></div></div>';
+  }).join('');
+}
+
+function renderLive(){
+  var g1=document.getElementById('live-grid'),rpl=document.getElementById('rp-live');
+  var html=LIVE.map(function(s){
+    return '<div class="lcard" onclick="openLive(\''+s.h+'\')"><div class="lc-th" style="background:linear-gradient(135deg,'+s.c1+'11,var(--bg4))"><div class="lc-live">LIVE</div><span style="font-size:28px">'+s.emoji+'</span><div class="lc-vw">'+s.viewers+' watching</div></div><div class="lc-info"><div class="lc-name">'+getA(s.h).n+'</div><div class="lc-sub">'+s.title+(s.price>0?' · $'+s.price:' · FREE')+'</div></div></div>';
+  }).join('');
+  if(g1)g1.innerHTML=html;
+  if(rpl)rpl.innerHTML=LIVE.slice(0,2).map(function(s){
+    return '<div class="lcard" onclick="openLive(\''+s.h+'\')" style="margin-bottom:7px"><div class="lc-th" style="height:70px;background:linear-gradient(135deg,'+s.c1+'11,var(--bg4))"><div class="lc-live">LIVE</div><span>'+s.emoji+'</span><div class="lc-vw">'+s.viewers+'</div></div><div class="lc-info"><div class="lc-name" style="font-size:11px">'+getA(s.h).n+'</div><div class="lc-sub" style="font-size:9px">'+s.title.slice(0,28)+'...</div></div></div>';
+  }).join('');
+}
+
+function renderArtists(){
+  var el=document.getElementById('artists-grid');if(!el)return;
+  el.innerHTML=ARTISTS.map(function(a){
+    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;cursor:pointer;transition:.2s" onclick="openArtist(\''+a.h+'\')" onmouseover="this.style.borderColor=\'rgba(232,255,0,.2)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.06)\'">'
+      +'<div style="height:56px;background:linear-gradient(135deg,'+a.c1+'18,'+a.c2+'22)"></div>'
+      +'<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,'+a.c1+','+a.c2+');display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;font-family:var(--alt);margin:-22px auto 0;border:2px solid var(--bg2);color:#000">'+a.n[0]+'</div>'
+      +'<div style="padding:9px;text-align:center"><div style="font-size:12px;font-weight:700">'+a.n+'</div><div style="font-size:9px;color:var(--muted);margin:2px 0 7px">'+a.genre+' · '+fmt(a.fans)+' fans</div>'
+      +'<button style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.14);color:var(--green);border-radius:5px;padding:5px;font-size:9px;font-weight:700;width:100%;cursor:pointer" onclick="event.stopPropagation();cashApp(\''+a.ca+'\',\'Support\',5)">Support '+a.ca+'</button></div></div>';
+  }).join('');
+  var ha=document.getElementById('hero-artists');
+  if(ha)ha.innerHTML=ARTISTS.slice(0,5).map(function(a){
+    return '<div style="flex-shrink:0;width:100px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center;cursor:pointer" onclick="openArtist(\''+a.h+'\')">'
+      +'<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+a.c1+','+a.c2+');display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin:0 auto 6px;color:#000">'+a.n[0]+'</div>'
+      +'<div style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+a.n+'</div>'
+      +'<div style="font-size:8px;color:var(--muted);margin-top:1px">'+a.genre+'</div></div>';
+  }).join('');
+}
+
+function renderBeats(){
+  var el=document.getElementById('beats-grid');if(!el)return;
+  var items=[];
+  ARTISTS.forEach(function(a){a.prods.forEach(function(p){if(p.t==='Beats'||p.t==='Stems')items.push({a:a,p:p});});});
+  el.innerHTML=items.map(function(b){
+    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;gap:10px;align-items:center;margin-bottom:7px;cursor:pointer;transition:.15s" onmouseover="this.style.borderColor=\'rgba(232,255,0,.15)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.06)\'" onclick="cashApp(\''+b.a.ca+'\',\''+b.p.n+'\','+b.p.p+')">'
+      +'<div style="width:48px;height:48px;border-radius:7px;background:linear-gradient(135deg,'+b.a.c1+'18,var(--bg4));display:flex;align-items:center;justify-content:center;font-weight:700;color:'+b.a.c1+';font-size:13px;flex-shrink:0">B</div>'
+      +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+b.p.n+'</div><div style="font-size:10px;color:var(--muted)">by '+b.a.n+' · '+b.p.t+'</div></div>'
+      +'<div style="text-align:right"><div style="font-family:var(--head);font-size:18px;color:var(--y)">$'+b.p.p+'</div><button style="background:var(--y);color:#000;border:none;border-radius:4px;padding:4px 10px;font-size:9px;font-weight:700;cursor:pointer;margin-top:3px" onclick="event.stopPropagation();cashApp(\''+b.a.ca+'\',\''+b.p.n+'\','+b.p.p+')">BUY</button></div></div>';
+  }).join('');
+}
+
+function renderRP(){
+  var rs=document.getElementById('rp-suggest');
+  if(rs)rs.innerHTML=ARTISTS.slice(0,5).map(function(a){
+    return '<div class="sa" onclick="openArtist(\''+a.h+'\')">'
+      +'<div class="sa-av" style="background:linear-gradient(135deg,'+a.c1+'18,'+a.c1+'33);color:'+a.c1+'">'+a.n[0]+'</div>'
+      +'<div class="sa-info"><div class="sa-name">'+a.n+'</div><div class="sa-genre">'+a.genre+' · '+fmt(a.fans)+' fans</div></div>'
+      +'<button class="sa-fol" onclick="event.stopPropagation();folA(this,\''+a.h+'\')">Follow</button></div>';
+  }).join('');
+  var rt=document.getElementById('rp-trending');
+  if(rt)['#HSW365','#IndieArtist','#BeatLab','#DirectToFan','#NoLabel','#LiveStream','#Trap2025','#ArtistEmpire'].forEach(function(tag){
+    var b=document.createElement('span');b.className='ttag';b.textContent=tag;
+    b.onclick=function(){toast('Trending: '+tag);};rt.appendChild(b);
+  });
+}
+
+function openArtist(handle){
+  var a=ARTISTS.find(function(x){return x.h===handle;});if(!a)return;
+  var el=document.getElementById('artist-content');if(!el)return;
+  var tracks=a.tracks.map(function(t,i){
+    return '<div class="track-i"><div style="width:24px;text-align:center;font-size:11px;color:var(--muted)">'+(i+1)+'</div>'
+      +'<button class="tplay" style="background:linear-gradient(135deg,'+a.c1+','+a.c2+')" onclick="playT(this,\''+t+'\')">&#9654;</button>'
+      +'<div class="track-info"><div class="track-t">'+t+'</div><div class="track-m">'+a.n+' · Stream free</div></div>'
+      +'<a href="https://cash.app/'+a.ca+'/2" target="_blank" class="btn btn-out btn-sm" style="font-size:9px">$1.99</a></div>';
+  }).join('');
+  var prods=a.prods.map(function(p){
+    var ic={Beats:'B',Stems:'S',Merch:'M',Service:'F'}[p.t]||'P';
+    return '<div class="pcard" onclick="cashApp(\''+a.ca+'\',\''+p.n+'\','+p.p+')">'
+      +'<div class="pc-ic" style="background:linear-gradient(135deg,'+a.c1+'18,'+a.c2+'22);color:'+a.c1+'">'+ic+'</div>'
+      +'<div class="pc-name">'+p.n+'</div><div class="pc-type">'+p.t+'</div><div class="pc-price">$'+p.p+'</div></div>';
+  }).join('');
+  var tix=a.tix&&a.tix.length?a.tix.map(function(t){
+    return '<div class="tcket" onclick="cashApp(\''+a.ca+'\',\''+t.tt+'\','+t.p+')">'
+      +'<div class="tc-dt"><div class="tc-mo">'+t.d+'</div><div class="tc-dy">'+t.dy+'</div></div>'
+      +'<div class="tc-info"><div class="tc-tt">'+t.tt+'</div><div class="tc-ve">'+t.v+'</div></div>'
+      +'<div class="tc-pr">$'+t.p+'</div></div>';
+  }).join(''):'<div style="color:var(--muted);font-size:12px;padding:18px 0">No upcoming events</div>';
+
+  el.innerHTML='<div class="ap-banner" style="background:linear-gradient(135deg,'+a.c1+'12,'+a.c2+'18,var(--bg3))"><div class="ap-bg-grad"></div></div>'
+    +'<div class="ap-info"><div class="ap-av-row"><div class="ap-av" style="background:linear-gradient(135deg,'+a.c1+','+a.c2+')">'+a.n[0]+'</div>'
+    +'<div><div class="ap-name">'+a.n+'</div><div class="ap-handle">@'+a.h+' · artistempire.live/'+a.h+'</div></div></div>'
+    +'<div class="ap-stats"><div><div class="ap-sn">'+fmt(a.fans)+'</div><div class="ap-sl">Fans</div></div><div><div class="ap-sn">'+fmt(a.sales)+'</div><div class="ap-sl">Sales</div></div><div><div class="ap-sn">90%</div><div class="ap-sl">Their Cut</div></div></div>'
+    +'<div class="ap-bio">'+a.bio+'</div>'
+    +'<div class="ap-acts"><a href="https://cash.app/'+a.ca+'" target="_blank" class="btn btn-green btn-sm">Support on CashApp</a><button class="btn btn-ghost btn-sm" onclick="folA(this,\''+a.h+'\')">Follow</button><button class="btn btn-ghost btn-sm" onclick="copyTxt(\'https://artistempire.live/'+a.h+'\')">Share</button></div>'
+    +'<div class="ap-tabs"><div class="ap-tab on" onclick="apTab(this,\'music\')">Music</div><div class="ap-tab" onclick="apTab(this,\'store\')">Store</div><div class="ap-tab" onclick="apTab(this,\'tickets\')">Tickets & Live</div><div class="ap-tab" onclick="apTab(this,\'tip\')">Send Tip</div></div>'
+    +'<div class="ap-tc">'
+    +'<div id="apt-music">'+tracks+'</div>'
+    +'<div id="apt-store" style="display:none"><div class="pgrid">'+prods+'</div></div>'
+    +'<div id="apt-tickets" style="display:none">'+tix
+    +'<div style="background:var(--bg3);border:1px solid rgba(255,45,45,.2);border-radius:8px;padding:12px;display:flex;gap:10px;align-items:center;margin-top:10px;cursor:pointer" onclick="openLive(\''+a.h+'\')">'
+    +'<div style="width:36px;height:36px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:12px">L</div>'
+    +'<div><div style="font-size:12px;font-weight:700">Watch Live</div><div style="font-size:10px;color:var(--muted)">Join '+a.n+' live when streaming</div></div>'
+    +'<span class="badge-live" style="margin-left:auto"><span class="live-dot"></span>LIVE</span></div></div>'
+    +'<div id="apt-tip" style="display:none"><div class="tip-box"><div class="tip-tt">Support '+a.n+' Directly</div>'
+    +'<div class="tip-sub">100% goes to the artist. No cut. No delay.</div>'
+    +'<div class="tip-amts">'+['$1','$5','$10','$25','$50','$100'].map(function(amt){return '<button class="tamt" onclick="selTip(this,\''+a.ca+'\',\''+a.h+'\','+amt.replace('$','')+')">'+amt+'</button>';}).join('')+'</div>'
+    +'<button class="ca-btn" id="tip-btn-'+a.h+'" onclick="window.open(\'https://cash.app/'+a.ca+'\',\'_blank\')">Send via CashApp '+a.ca+'</button></div></div>'
+    +'</div></div>';
+  sv('artist');
+}
+
+function apTab(btn,tab){
+  document.querySelectorAll('.ap-tab').forEach(function(t){t.classList.remove('on');});btn.classList.add('on');
+  ['music','store','tickets','tip'].forEach(function(t){var e=document.getElementById('apt-'+t);if(e)e.style.display=t===tab?'block':'none';});
+}
+
+function selTip(btn,ca,handle,amt){
+  document.querySelectorAll('.tamt').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  var b=document.getElementById('tip-btn-'+handle);
+  if(b){
+    b.innerHTML='Send $'+amt+' via CashApp '+ca;
+    b.onclick=function(){window.open('https://cash.app/'+ca+'/'+amt,'_blank');};
+  }
+  toast('$'+amt+' tip ready — tap Send to pay directly','ok');
+}
+
+function openLive(handle){
+  var a=getA(handle);
+  var ls=LIVE.find(function(x){return x.h===handle;});
+  var title=ls?ls.title:a.n+' Live';
+  var price=ls?ls.price:0;
+  if(price>0){
+    if(confirm('Watch '+title+' for $'+price+'?\n\n100% goes directly to the artist via CashApp.\n\nTap OK to open CashApp and pay.')){
+      cashApp(a.ca,'Live Stream: '+title,price);
+    }
+  } else {
+    toast('Joining '+a.n+''s free stream...','ok');
+    setTimeout(function(){toast('Live streaming integration coming soon. Follow artist for updates.');},1800);
+  }
+}
+
+function cashApp(ca,item,price){window.open('https://cash.app/'+ca+'/'+price,'_blank');toast('Opening CashApp — $'+price+' for '+item,'ok');}
+function tipA(h){var a=getA(h);var amt=prompt('How much to tip '+a.n+'? (number)');if(amt&&!isNaN(amt))cashApp(a.ca,'Tip for '+a.n,parseInt(amt));}
+function playT(btn,t){
+  document.querySelectorAll('.tplay').forEach(function(b){if(b!==btn)b.innerHTML='&#9654;';});
+  var playing=btn.innerHTML!=='&#9654;';
+  btn.innerHTML=playing?'&#9654;':'&#9646;&#9646;';
+  if(!playing){
+    var artistName='';
+    var nm=btn.closest('.track-i');
+    if(nm){var m=nm.querySelector('.track-m');if(m)artistName=m.textContent.split('·')[0].trim();}
+    showNP(t,artistName||'Artist Empire');
+    toast('Now playing: '+t,'ok');
+  }
+}
+function folA(btn,h){
+  var following=btn.textContent.trim()==='Following';
+  btn.textContent=following?'Follow':'Following';
+  btn.style.color=following?'':'var(--green)';
+  btn.style.borderColor=following?'':'var(--green)';
+  btn.classList.toggle('on',!following);
+  toast(following?'Unfollowed':'Following '+h+'! You will get notified of new drops.','ok');
+}
+function likeP(btn,id){btn.classList.toggle('liked');var p=POSTS.find(function(x){return x.id===id;});if(p){p.likes+=btn.classList.contains('liked')?1:-1;btn.innerHTML='&#9825; '+fmt(p.likes);}}
+function filterA(q){var el=document.getElementById('artists-grid');if(!el)return;var list=q?ARTISTS.filter(function(a){return a.n.toLowerCase().includes(q.toLowerCase())||a.genre.toLowerCase().includes(q.toLowerCase());}):ARTISTS;el.innerHTML='';ARTISTS=ARTISTS;renderArtists();if(q){var f=ARTISTS.filter(function(a){return a.n.toLowerCase().includes(q.toLowerCase())||a.genre.toLowerCase().includes(q.toLowerCase());});el.innerHTML=f.map(function(a){return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;cursor:pointer;transition:.2s" onclick="openArtist(\''+a.h+'\')" onmouseover="this.style.borderColor=\'rgba(232,255,0,.2)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.06)\'"><div style="height:56px;background:linear-gradient(135deg,'+a.c1+'18,'+a.c2+'22)"></div><div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,'+a.c1+','+a.c2+');display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;margin:-22px auto 0;border:2px solid var(--bg2);color:#000">'+a.n[0]+'</div><div style="padding:9px;text-align:center"><div style="font-size:12px;font-weight:700">'+a.n+'</div><div style="font-size:9px;color:var(--muted);margin:2px 0 7px">'+a.genre+'</div><button style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.14);color:var(--green);border-radius:5px;padding:5px;font-size:9px;font-weight:700;width:100%;cursor:pointer" onclick="event.stopPropagation();cashApp(\''+a.ca+'\',\'Support\',5)">Support '+a.ca+'</button></div></div>';}).join('');}else{renderArtists();}}
+function searchQ(q){
+  if(!q||q.length<2)return;
+  var a=ARTISTS.find(function(x){
+    return x.n.toLowerCase().includes(q.toLowerCase())||
+           x.genre.toLowerCase().includes(q.toLowerCase())||
+           x.h.toLowerCase().includes(q.toLowerCase());
+  });
+  if(a){openArtist(a.h);}
+  else{toast('No artists found for "'+q+'"');}
+}
+function getA(h){return ARTISTS.find(function(x){return x.h===h;})||{n:h.toUpperCase(),ca:'$'+h,c1:'#E8FF00',c2:'#b8cc00'};}
+
+function renderDash(){
+  var el=document.getElementById('dash-wrap');if(!el)return;
+  var u=ST.prof||(ST.user&&ST.user.user_metadata)||{};
+  var plan=u.plan||'artist';var prices={artist:20,label:40,empire:99};
+  el.innerHTML='<div style="font-family:var(--head);font-size:26px;letter-spacing:2px;margin-bottom:16px">WELCOME, '+((u.artist_name||u.name||'ARTIST').split(' ')[0]).toUpperCase()+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:16px">'
+    +'<div class="dc" style="padding:12px"><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Plan</div><div style="font-family:var(--head);font-size:18px;color:var(--y);margin:4px 0">'+plan.toUpperCase()+'</div><div style="font-size:9px;color:var(--green)">$'+(prices[plan]||20)+'/mo</div></div>'
+    +'<div class="dc" style="padding:12px"><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">CashApp</div><div style="font-size:13px;font-weight:700;margin:4px 0;color:var(--green)">'+(u.cashapp||'Not set')+'</div><div style="font-size:9px;color:var(--muted)">Fans pay here</div></div>'
+    +'<div class="dc" style="padding:12px"><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Your Cut</div><div style="font-family:var(--head);font-size:18px;color:var(--y);margin:4px 0">90%</div><div style="font-size:9px;color:var(--muted)">Of every sale</div></div>'
+    +'</div>'
+    +'<div class="dtab-row"><button class="dtab on" onclick="ds(this,\'over\')">Overview</button><button class="dtab" onclick="ds(this,\'music\')">Music</button><button class="dtab" onclick="ds(this,\'store\')">Store</button><button class="dtab" onclick="ds(this,\'tix\')">Tickets</button><button class="dtab" onclick="ds(this,\'page\')">My Page</button><button class="dtab" onclick="ds(this,\'set\')">Settings</button></div>'
+    +'<div id="ds-content"></div>';
+  dsSec('over');
+}
+
+function ds(btn,name){document.querySelectorAll('.dtab').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');dsSec(name);}
+function dsSec(name){
+  var el=document.getElementById('ds-content');if(!el)return;
+  var u=ST.prof||(ST.user&&ST.user.user_metadata)||{};
+  var plan=u.plan||'artist';var prices={artist:20,label:40,empire:99};
+  if(name==='over'){
+    el.innerHTML='<div class="dc"><div class="dc-t">Quick Actions</div><div style="display:flex;gap:7px;flex-wrap:wrap">'
+      +'<button class="btn btn-y btn-sm" onclick="ds(document.querySelectorAll(\'.dtab\')[1],\'music\')">Add Music</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="ds(document.querySelectorAll(\'.dtab\')[2],\'store\')">Add Product</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="ds(document.querySelectorAll(\'.dtab\')[3],\'tix\')">Add Event</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="sv(\'mypage\')">Preview Page</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="sv(\'beatlab\')">Beat Lab</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="sv(\'ai\')">AI Tools</button></div></div>'
+      +'<div class="dc" style="margin-top:10px"><div class="dc-t">How Fans Pay You</div>'
+      +'<p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Fans visit your page and pay via CashApp to <strong style="color:var(--txt)">'+(u.cashapp||'(set your CashApp in Settings)')+'</strong>. You keep 90%. Artist Empire keeps 10%. No 90-day wait. No $0.003 per stream.</p>'
+      +(u.cashapp?'<a href="https://cash.app/'+u.cashapp+'" target="_blank" class="btn btn-green btn-sm">Test Your CashApp Link</a>':'<button class="btn btn-out btn-sm" onclick="ds(document.querySelectorAll(\'.dtab\')[5],\'set\')">Set CashApp Tag</button>')
+      +'</div>';
+  }else if(name==='music'){
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;color:var(--muted)">Your tracks — fans buy direct</div><button class="btn btn-y btn-sm" onclick="addTrack()">+ Add Track</button></div><div id="music-list"><div style="color:var(--muted);font-size:12px">Loading...</div></div>';
+    loadMusic();
+  }else if(name==='store'){
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;color:var(--muted)">Beats, merch, stems — fans buy direct via CashApp</div><button class="btn btn-y btn-sm" onclick="addProd()">+ Add Product</button></div><div id="store-list"><div style="color:var(--muted);font-size:12px">Loading...</div></div>';
+    loadStore();
+  }else if(name==='tix'){
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;color:var(--muted)">Live streams, shows, virtual events</div><button class="btn btn-y btn-sm" onclick="addTix()">+ Add Event</button></div><div id="tix-list"><div style="color:var(--muted);font-size:12px">Loading...</div></div>';
+    loadTix();
+  }else if(name==='page'){
+    el.innerHTML='<div class="dc"><div class="dc-t">Page Info</div>'
+      +'<label class="dinp-l">Artist / Creator Name</label><input class="dinp" id="dp-ar" value="'+(u.artist_name||'')+'" placeholder="Your name"/>'
+      +'<label class="dinp-l">Bio</label><textarea class="dinp" id="dp-bio" rows="3" style="resize:vertical" placeholder="Tell your story...">'+(u.bio||'')+'</textarea>'
+      +'<label class="dinp-l">CashApp Tag</label><input class="dinp" id="dp-ca" value="'+(u.cashapp||'')+'" placeholder="$yourname" style="color:var(--green)"/>'
+      +'<label class="dinp-l">Genre / Category</label><input class="dinp" id="dp-ge" value="'+(u.genre||'')+'" placeholder="Hip-Hop, R&B, Content Creator..."/>'
+      +'<button class="btn btn-y" onclick="savePageInfo()">SAVE PAGE</button></div>'
+      +'<div class="dc" style="margin-top:10px"><div class="dc-t">Your Live Link</div>'
+      +'<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:11px;color:var(--y);margin-bottom:9px;word-break:break-all">artistempire.live/'+((u.artist_name||u.name||'yourname').toLowerCase().replace(/\s+/g,''))+'</div>'
+      +'<div style="display:flex;gap:7px"><button class="btn btn-ghost btn-sm" onclick="copyTxt(\'https://artistempire.live/'+((u.artist_name||u.name||'').toLowerCase().replace(/\s+/g,''))+'\')">Copy Link</button><button class="btn btn-y btn-sm" onclick="sv(\'mypage\')">Preview</button></div></div>';
+  }else if(name==='set'){
+    el.innerHTML='<div class="dc"><div class="dc-t">Profile</div>'
+      +'<label class="dinp-l">Full Name</label><input class="dinp" id="set-nm" value="'+(u.name||'')+'"/>'
+      +'<label class="dinp-l">Artist Name</label><input class="dinp" id="set-ar" value="'+(u.artist_name||'')+'"/>'
+      +'<label class="dinp-l">CashApp Tag</label><input class="dinp" id="set-ca" value="'+(u.cashapp||'')+'" placeholder="$yourname" style="color:var(--green)"/>'
+      +'<label class="dinp-l">Email</label><input class="dinp" value="'+(ST.user&&ST.user.email||'')+'" disabled style="opacity:.4"/>'
+      +'<button class="btn btn-y" onclick="saveSettings()">SAVE SETTINGS</button></div>'
+      +'<div class="dc" style="margin-top:10px"><div class="dc-t">Subscription</div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-family:var(--head);font-size:20px;color:var(--y)">'+plan.toUpperCase()+'</div><div style="font-size:11px;color:var(--muted)">$'+(prices[plan]||20)+'/month</div></div>'
+      +'<a href="'+(STRIPE[plan]||STRIPE.artist)+'" target="_blank" class="btn btn-ghost btn-sm">Manage</a></div></div>';
+  }
+}
+
+async function loadMusic(){
+  var el=document.getElementById('music-list');if(!el||!ST.user)return;
+  var r=await sb.from('tracks').select('*').eq('user_id',ST.user.id).order('created_at',{ascending:false});
+  if(!r.data||!r.data.length){el.innerHTML='<div class="empty"><div style="font-size:30px">M</div><div style="font-size:13px;font-weight:600;margin:8px 0">No tracks yet</div><div style="font-size:11px;margin-bottom:14px">Add tracks for fans to buy direct</div><button class="btn btn-y btn-sm" onclick="addTrack()">Add First Track</button></div>';return;}
+  el.innerHTML=r.data.map(function(t){return '<div class="irow"><div class="irow-m"><div class="irow-t">'+t.title+'</div><div class="irow-s">'+t.genre+' · $'+t.price+'</div></div><span class="bl">LIVE</span></div>';}).join('');
+}
+async function loadStore(){
+  var el=document.getElementById('store-list');if(!el||!ST.user)return;
+  var r=await sb.from('store_products').select('*').eq('user_id',ST.user.id).order('created_at',{ascending:false});
+  if(!r.data||!r.data.length){el.innerHTML='<div class="empty"><div style="font-size:30px">S</div><div style="font-size:13px;font-weight:600;margin:8px 0">Store empty</div><div style="font-size:11px;margin-bottom:14px">Add beats, merch, or services</div><button class="btn btn-y btn-sm" onclick="addProd()">Add First Product</button></div>';return;}
+  el.innerHTML=r.data.map(function(p){return '<div class="irow"><div class="irow-m"><div class="irow-t">'+p.name+'</div><div class="irow-s">'+p.type+'</div></div><div style="font-family:var(--head);font-size:16px;color:var(--y);margin-right:8px">$'+p.price+'</div><span class="bl">ACTIVE</span></div>';}).join('');
+}
+async function loadTix(){
+  var el=document.getElementById('tix-list');if(!el||!ST.user)return;
+  try{
+    var r=await sb.from('events').select('*').eq('user_id',ST.user.id).order('created_at',{ascending:false});
+    if(!r.data||!r.data.length){el.innerHTML='<div class="empty"><div style="font-size:30px">T</div><div style="font-size:13px;font-weight:600;margin:8px 0">No events yet</div><div style="font-size:11px;margin-bottom:14px">Add live streams, concerts, studio sessions</div><button class="btn btn-y btn-sm" onclick="addTix()">Add First Event</button></div>';return;}
+    el.innerHTML=r.data.map(function(e){return '<div class="irow"><div class="irow-m"><div class="irow-t">'+e.title+'</div><div class="irow-s">'+e.venue+' · $'+e.price+'</div></div><span class="'+(e.live?'bl':'bp')+'">'+(e.live?'LIVE':'UPCOMING')+'</span></div>';}).join('');
+  }catch(e){el.innerHTML='<div class="empty"><div style="font-size:11px">Run events table SQL in Supabase first</div><button class="btn btn-y btn-sm" onclick="addTix()">Add Event</button></div>';}
+}
+
+function addTrack(){
+  var t=prompt('Track title:');if(!t)return;
+  var gen=prompt('Genre:')||'Hip-Hop';var p=prompt('Buy price (e.g. 1.99):')||'1.99';
+  if(!ST.user){toast('Sign in first','err');return;}
+  sb.from('tracks').insert([{user_id:ST.user.id,title:t,genre:gen,price:parseFloat(p),created_at:new Date().toISOString()}]).then(function(r){if(r.error){toast('Error: '+r.error.message,'err');return;}toast('Track added!','ok');loadMusic();});
+}
+function addProd(){
+  var n=prompt('Product name:');if(!n)return;
+  var t=prompt('Type: Beats / Stems / Merch / Service')||'Beats';var p=prompt('Price in USD:');if(!p||isNaN(p)){toast('Invalid price','err');return;}
+  if(!ST.user){toast('Sign in first','err');return;}
+  sb.from('store_products').insert([{user_id:ST.user.id,name:n,type:t,price:parseFloat(p),created_at:new Date().toISOString()}]).then(function(r){if(r.error){toast('Error: '+r.error.message,'err');return;}toast('Product added!','ok');loadStore();});
+}
+function addTix(){
+  var t=prompt('Event name:');if(!t)return;
+  var v=prompt('Venue (e.g. Virtual Livestream):')||'Virtual';var p=prompt('Ticket price (0 for free):')||'0';var d=prompt('Date (e.g. JUN 14):')||'TBD';
+  if(!ST.user){toast('Sign in first','err');return;}
+  sb.from('events').insert([{user_id:ST.user.id,title:t,venue:v,price:parseFloat(p),date:d,live:false,created_at:new Date().toISOString()}]).then(function(r){if(r.error){toast('Error: '+r.error.message,'err');return;}toast('Event added!','ok');loadTix();});
+}
+async function saveSettings(){
+  if(!ST.user)return;
+  var nm=g('set-nm'),ar=g('set-ar'),ca=g('set-ca');
+  if(ca&&!ca.startsWith('$')){toast('CashApp must start with $','err');return;}
+  var r=await sb.from('profiles').upsert([{id:ST.user.id,name:nm,artist_name:ar,cashapp:ca,updated_at:new Date().toISOString()}]);
+  if(r.error){toast('Error saving','err');return;}
+  await loadProf();setNavIn();toast('Saved!','ok');
+}
+async function savePageInfo(){
+  if(!ST.user)return;
+  var ar=g('dp-ar'),bio=g('dp-bio'),ca=g('dp-ca'),ge=g('dp-ge');
+  var handle=ar.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  var r=await sb.from('profiles').upsert([{id:ST.user.id,artist_name:ar,bio:bio,cashapp:ca,genre:ge,handle:handle,updated_at:new Date().toISOString()}]);
+  if(r.error){toast('Error saving','err');return;}
+  await loadProf();toast('Page updated! artistempire.live/'+handle,'ok');
+}
+
+function renderMyPage(){
+  var u=ST.prof||(ST.user&&ST.user.user_metadata)||{};
+  var handle=(u.handle||(u.artist_name||u.name||'yourname').toLowerCase().replace(/\s+/g,''));
+  var fake={n:(u.artist_name||u.name||'YOUR NAME').toUpperCase(),h:handle,ca:u.cashapp||'$yourname',bio:u.bio||'Independent creator on Artist Empire.',genre:u.genre||'Music',c1:'#E8FF00',c2:'#b8cc00',tracks:['My Track 1','My Track 2','My Track 3'],prods:[],tix:[],fans:0,sales:0};
+  ARTISTS.unshift(fake);
+  openArtist(handle);
+  var ac=document.getElementById('artist-content');
+  var mw=document.getElementById('mypage-wrap');
+  if(ac&&mw)mw.innerHTML=ac.innerHTML;
+  ARTISTS.shift();
+  document.getElementById('v-mypage').classList.add('on');
+  document.getElementById('v-artist').classList.remove('on');
+}
+
+function initAI(){setAIM('chat');}
+function setAIM(mode){
+  ST.aim=mode;ST.aiH=[];
+  var msgs=document.getElementById('ai-msgs');if(msgs)msgs.innerHTML='';
+  document.querySelectorAll('[id^="am-"]').forEach(function(b){b.classList.remove('on');});
+  var btn=document.getElementById('am-'+mode);if(btn)btn.classList.add('on');
+  var starts={chat:'What\'s good! I\'m your Artist Empire AI. Ask me anything about building your music career, growing fans, or making real money from your art.',lyrics:'Let\'s create. Tell me the genre, vibe, topic, and any lines you have — I\'ll write the full song.',beats:'What kind of beat you need? Give me the genre, energy, and artists you\'re feeling.',biz:'Music business advisor ready. Ask about publishing, sync deals, brand partnerships, live income, contracts, or growing globally.'};
+  aiMsg(starts[mode]||starts.chat,false,'ai-msgs');
+}
+function aiMsg(text,isU,cid){
+  var msgs=document.getElementById(cid||'ai-msgs');if(!msgs)return;
+  var u=ST.prof||(ST.user&&ST.user.user_metadata)||{};
+  var d=document.createElement('div');d.className='amsg'+(isU?' u':'');
+  d.innerHTML='<div class="aav '+(isU?'u':'b')+'">'+(isU?((u.name||'U')[0]||'U').toUpperCase():'AI')+'</div><div class="abub '+(isU?'u':'b')+'">'+text+'</div>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+async function sendAI(){
+  var inp=document.getElementById('ai-inp');if(!inp||!inp.value.trim())return;
+  var text=inp.value.trim();inp.value='';
+  aiMsg(text,true,'ai-msgs');ST.aiH.push({role:'user',content:text});
+  var msgs=document.getElementById('ai-msgs');
+  var td=document.createElement('div');td.className='amsg';td.id='ai-td';
+  td.innerHTML='<div class="aav b">AI</div><div class="abub b"><div class="adots"><span></span><span></span><span></span></div></div>';
+  if(msgs){msgs.appendChild(td);msgs.scrollTop=msgs.scrollHeight;}
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:AISYS[ST.aim]||AISYS.chat,messages:ST.aiH})});
+    var data=await res.json();
+    var t=document.getElementById('ai-td');if(t)t.remove();
+    var reply=data.content&&data.content[0]?data.content[0].text:'Error. Try again.';
+    ST.aiH.push({role:'assistant',content:reply});aiMsg(reply,false,'ai-msgs');
+  }catch(e){var t=document.getElementById('ai-td');if(t)t.remove();aiMsg('Connection error. Try again.',false,'ai-msgs');}
+}
+
+function initSeq(){buildSeq();buildViz();loadPreset('Trap');setTimeout(function(){baiMsg('What\'s good! Hit GENERATE BEAT or tell me what you need.',false);},400);}
+function buildSeq(){
+  var wrap=document.getElementById('seq-wrap');if(!wrap)return;
+  wrap.innerHTML=SEQT.map(function(t,ti){
+    return '<div class="seq-row"><div class="sn">'+t.n+'</div><div class="ssteps" id="sr-'+t.id+'">'+
+      new Array(ST.steps).fill(0).map(function(_,si){
+        return '<div class="stp'+(si%4===0&&si>0?' b4':'')+(t.pat[si]?' on '+t.col:'')+'" data-ti="'+ti+'" data-si="'+si+'" onclick="togS(this)"></div>';
+      }).join('')+'</div></div>';
+  }).join('');
+}
+function togS(el){var ti=parseInt(el.dataset.ti),si=parseInt(el.dataset.si);SEQT[ti].pat[si]=SEQT[ti].pat[si]?0:1;el.className='stp'+(si%4===0&&si>0?' b4':'')+(SEQT[ti].pat[si]?' on '+SEQT[ti].col:'');}
+function buildViz(){var w=document.getElementById('viz-wrap');if(!w)return;w.innerHTML='';for(var i=0;i<36;i++){var b=document.createElement('div');b.className='vbar';b.style.cssText='flex:1;border-radius:1px;background:var(--blue);opacity:.5;height:4px;transition:height .07s';w.appendChild(b);}}
+function loadPreset(g){var p=PRESETS[g]||PRESETS['Trap'];SEQT.forEach(function(t){if(p[t.id]){for(var i=0;i<16;i++)t.pat[i]=p[t.id][i]!==undefined?p[t.id][i]:0;}else{t.pat=new Array(ST.steps).fill(0);}});buildSeq();}
+function togPlay(){
+  ST.playing=!ST.playing;
+  var btn=document.getElementById('bl-play');
+  if(btn){btn.textContent=ST.playing?'STOP':'PLAY';btn.className='bl-play'+(ST.playing?' stp':'');}
+  if(ST.playing)runSeq();else{clearTimeout(ST.timer);document.querySelectorAll('.stp').forEach(function(e){e.classList.remove('cur');});ST.step=-1;}
+}
+function runSeq(){
+  if(!ST.playing)return;
+  ST.step=(ST.step+1)%ST.steps;
+  document.querySelectorAll('.stp').forEach(function(e){e.classList.remove('cur');if(parseInt(e.dataset.si)===ST.step)e.classList.add('cur');});
+  document.querySelectorAll('.vbar').forEach(function(b){var h=Math.random()*18+4;b.style.height=h+'px';b.style.opacity=(h/22)*.8+.1;});
+  ST.timer=setTimeout(runSeq,(60000/ST.bpm)/4);
+}
+function clrBeat(){SEQT.forEach(function(t){t.pat=new Array(ST.steps).fill(0);});buildSeq();toast('Cleared');}
+function chBPM(d){ST.bpm=Math.max(60,Math.min(200,ST.bpm+d));var el=document.getElementById('bpm-n');if(el)el.textContent=ST.bpm;}
+function selG(btn,genre){ST.genre=genre;document.querySelectorAll('.gbtn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');loadPreset(genre);toast('Genre: '+genre,'ok');}
+function upSl(k,v){var el=document.getElementById('sv-'+k);if(el)el.textContent=v+'%';}
+function baiMsg(text,isU){
+  var msgs=document.getElementById('bai-msgs');if(!msgs)return;
+  var d=document.createElement('div');d.className='amsg'+(isU?' u':'');
+  d.innerHTML='<div class="aav '+(isU?'u':'b')+'">'+(isU?'YOU':'AI')+'</div><div class="abub '+(isU?'u':'b')+'">'+text+'</div>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+async function sendBAI(){
+  var inp=document.getElementById('bai-inp');if(!inp||!inp.value.trim())return;
+  var text=inp.value.trim();inp.value='';
+  baiMsg(text,true);ST.baiH.push({role:'user',content:text});
+  var msgs=document.getElementById('bai-msgs');
+  var td=document.createElement('div');td.className='amsg';td.id='bai-td';
+  td.innerHTML='<div class="aav b">AI</div><div class="abub b"><div class="adots"><span></span><span></span><span></span></div></div>';
+  if(msgs){msgs.appendChild(td);msgs.scrollTop=msgs.scrollHeight;}
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:BAISYS,messages:ST.baiH})});
+    var data=await res.json();
+    var t=document.getElementById('bai-td');if(t)t.remove();
+    var reply=data.content&&data.content[0]?data.content[0].text:'Error. Try again.';
+    ST.baiH.push({role:'assistant',content:reply});baiMsg(reply,false);
+    var bm=reply.match(/BPM[:\s]+(\d{2,3})/i);if(bm){ST.bpm=parseInt(bm[1]);var bv=document.getElementById('bpm-n');if(bv)bv.textContent=ST.bpm;}
+  }catch(e){var t=document.getElementById('bai-td');if(t)t.remove();baiMsg('Connection error. Try again.',false);}
+}
+async function genBeat(){
+  var btn=document.getElementById('gen-btn');if(btn){btn.disabled=true;btn.textContent='GENERATING...';}
+  var key=document.getElementById('bl-key')?document.getElementById('bl-key').value:'A Minor';
+  var inp=document.getElementById('bai-inp');
+  if(inp)inp.value='Generate a complete original beat blueprint for a '+ST.genre+' beat in '+key+' at '+ST.bpm+' BPM. Include BPM, Key, Drum Pattern, 808 pattern, Melodic elements, Chord progression, Arrangement, Mixing tips, and 3 artist references.';
+  await sendBAI();loadPreset(ST.genre);
+  if(btn){btn.disabled=false;btn.textContent='GENERATE BEAT WITH AI';}
+  toast('Beat blueprint generated!','ok');
+}
+async function genLyrics(){
+  var key=document.getElementById('bl-key')?document.getElementById('bl-key').value:'A Minor';
+  var inp=document.getElementById('bai-inp');
+  if(inp)inp.value='Write a complete original song for a '+ST.genre+' beat in '+key+' at '+ST.bpm+' BPM. Include [Verse 1], [Hook], [Verse 2], [Bridge].';
+  await sendBAI();
+}
+
+function g(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function v(id){var el=document.getElementById(id);return el?el.value:'';}
+function fmt(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n;}
+function toast(msg,type){
+  var box=document.getElementById('toasts');if(!box)return;
+  var el=document.createElement('div');el.className='toast'+(type?' '+type:'');el.textContent=msg;
+  box.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},3600);
+}
+function copyTxt(txt){if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('Copied!','ok');});else toast('Copy: '+txt);}
+function openM(n){var el=document.getElementById('m-'+n);if(el)el.classList.add('on');}
+function closeM(n){var el=document.getElementById('m-'+n);if(el)el.classList.remove('on');}
+</script>
+
+<div id="now-playing" style="display:none;position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(8,8,14,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(232,255,0,.15);z-index:300;align-items:center;padding:0 18px;gap:12px">
+  <div style="width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,var(--y),var(--orange));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">&#9835;</div>
+  <div style="flex:1;min-width:0">
+    <div id="np-title" style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Track Title</div>
+    <div id="np-artist" style="font-size:10px;color:var(--muted)">Artist Name</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer" onclick="prevTrack()">&#9664;</button>
+    <button id="np-play" style="background:var(--y);border:none;width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="togNP()">&#9646;&#9646;</button>
+    <button style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer" onclick="nextTrack()">&#9654;</button>
+  </div>
+  <div id="np-bar" style="position:absolute;bottom:0;left:0;height:2px;background:var(--y);width:0%;transition:width .5s linear"></div>
+</div>
+<script>
+// Now Playing mini player
+var NP={playing:false,track:'',artist:'',progress:0,interval:null};
+function showNP(title,artist){
+  NP.track=title;NP.artist=artist;NP.progress=0;NP.playing=true;
+  var el=document.getElementById('now-playing');
+  var nt=document.getElementById('np-title');
+  var na=document.getElementById('np-artist');
+  if(el)el.style.display='flex';
+  if(nt)nt.textContent=title;
+  if(na)na.textContent=artist;
+  clearInterval(NP.interval);
+  NP.interval=setInterval(function(){
+    NP.progress=Math.min(100,NP.progress+0.5);
+    var b=document.getElementById('np-bar');
+    if(b)b.style.width=NP.progress+'%';
+    if(NP.progress>=100){clearInterval(NP.interval);NP.progress=0;}
+  },500);
+}
+function togNP(){
+  NP.playing=!NP.playing;
+  var btn=document.getElementById('np-play');
+  if(btn)btn.innerHTML=NP.playing?'&#9646;&#9646;':'&#9654;';
+  if(NP.playing){NP.interval=setInterval(function(){NP.progress=Math.min(100,NP.progress+0.5);var b=document.getElementById('np-bar');if(b)b.style.width=NP.progress+'%';},500);}
+  else clearInterval(NP.interval);
+}
+function prevTrack(){toast('Previous track');}
+function nextTrack(){toast('Next track');}
+</script>
+</body>
+</html>
