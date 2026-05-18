@@ -6,224 +6,247 @@
 <title>ArtistEmpire.live</title>
 
 <style>
+
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
 body{
-  font-family:Arial,sans-serif;
-  background:#050505;
-  color:white;
-  line-height:1.6;
+font-family:Arial,sans-serif;
+background:#050505;
+color:white;
+line-height:1.6;
 }
 
 header{
-  background:#0d0d0d;
-  padding:20px;
-  border-bottom:1px solid #222;
-  position:sticky;
-  top:0;
+background:#0d0d0d;
+padding:20px;
+border-bottom:1px solid #222;
+position:sticky;
+top:0;
+z-index:1000;
 }
 
 nav{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+max-width:1200px;
+margin:auto;
 }
 
 .logo{
-  color:#e8ff00;
-  font-size:28px;
-  font-weight:bold;
+font-size:30px;
+font-weight:bold;
+color:#e8ff00;
 }
 
 nav ul{
-  list-style:none;
-  display:flex;
-  gap:20px;
+display:flex;
+gap:20px;
+list-style:none;
 }
 
 nav a{
-  color:white;
-  text-decoration:none;
-  font-size:14px;
+color:white;
+text-decoration:none;
+font-size:14px;
 }
 
 nav a:hover{
-  color:#e8ff00;
+color:#e8ff00;
 }
 
 .hero{
-  text-align:center;
-  padding:100px 20px;
-  background:linear-gradient(to bottom,#111,#050505);
+text-align:center;
+padding:100px 20px;
+background:linear-gradient(to bottom,#111,#050505);
 }
 
 .hero h1{
-  font-size:60px;
-  color:#e8ff00;
-  margin-bottom:20px;
+font-size:70px;
+color:#e8ff00;
+margin-bottom:20px;
 }
 
 .hero p{
-  max-width:700px;
-  margin:auto;
-  color:#ccc;
-  font-size:20px;
+max-width:700px;
+margin:auto;
+font-size:20px;
+color:#ccc;
 }
 
-.buttons{
-  margin-top:30px;
+.hero-buttons{
+margin-top:30px;
 }
 
 .btn{
-  display:inline-block;
-  padding:14px 25px;
-  margin:10px;
-  border-radius:6px;
-  text-decoration:none;
-  font-weight:bold;
+display:inline-block;
+padding:14px 24px;
+margin:10px;
+border-radius:6px;
+text-decoration:none;
+font-weight:bold;
+cursor:pointer;
+border:none;
 }
 
 .btn-primary{
-  background:#e8ff00;
-  color:black;
+background:#e8ff00;
+color:black;
 }
 
 .btn-secondary{
-  border:1px solid #e8ff00;
-  color:#e8ff00;
+background:transparent;
+border:1px solid #e8ff00;
+color:#e8ff00;
 }
 
 section{
-  padding:70px 20px;
-  max-width:1200px;
-  margin:auto;
+padding:70px 20px;
+max-width:1200px;
+margin:auto;
 }
 
 section h2{
-  text-align:center;
-  color:#e8ff00;
-  margin-bottom:40px;
-  font-size:36px;
+text-align:center;
+font-size:40px;
+margin-bottom:40px;
+color:#e8ff00;
 }
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
 }
 
 .card{
-  background:#111;
-  border:1px solid #222;
-  padding:25px;
-  border-radius:10px;
+background:#111;
+padding:25px;
+border-radius:10px;
+border:1px solid #222;
 }
 
 .card h3{
-  margin-bottom:15px;
-  color:#e8ff00;
+margin-bottom:15px;
+color:#e8ff00;
+}
+
+.card p{
+color:#ccc;
 }
 
 .price{
-  font-size:40px;
-  margin:20px 0;
-  color:#e8ff00;
-  font-weight:bold;
+font-size:42px;
+margin:20px 0;
+color:#e8ff00;
+font-weight:bold;
 }
 
 .card button{
-  width:100%;
-  padding:12px;
-  background:#e8ff00;
-  color:black;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
+width:100%;
+padding:14px;
+background:#e8ff00;
+color:black;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
 }
 
 .card button:hover{
-  background:#d4eb00;
+background:#d8ef00;
 }
 
 form{
-  max-width:600px;
-  margin:auto;
+max-width:600px;
+margin:auto;
 }
 
-input, textarea{
-  width:100%;
-  padding:14px;
-  margin-bottom:15px;
-  background:#111;
-  border:1px solid #222;
-  color:white;
-  border-radius:6px;
+input,
+textarea{
+width:100%;
+padding:14px;
+margin-bottom:15px;
+background:#111;
+border:1px solid #222;
+border-radius:6px;
+color:white;
 }
 
 textarea{
-  min-height:120px;
+min-height:120px;
 }
 
 form button{
-  width:100%;
-  padding:14px;
-  background:#e8ff00;
-  border:none;
-  color:black;
-  font-weight:bold;
-  border-radius:6px;
-  cursor:pointer;
+width:100%;
+padding:14px;
+background:#e8ff00;
+border:none;
+color:black;
+font-weight:bold;
+border-radius:6px;
+cursor:pointer;
 }
 
 .dashboard{
-  background:#111;
-  border:1px solid #222;
-  padding:25px;
-  border-radius:10px;
+background:#111;
+border:1px solid #222;
+padding:25px;
+border-radius:10px;
 }
 
 .dashboard ul{
-  margin-top:15px;
-  padding-left:20px;
+padding-left:20px;
+margin-top:15px;
 }
 
 footer{
-  text-align:center;
-  padding:30px;
-  border-top:1px solid #222;
-  color:#888;
+text-align:center;
+padding:30px;
+border-top:1px solid #222;
+color:#777;
+margin-top:50px;
 }
 
 @media(max-width:700px){
 
 .hero h1{
-  font-size:42px;
+font-size:45px;
 }
 
 .hero p{
-  font-size:16px;
+font-size:16px;
 }
 
 nav{
-  flex-direction:column;
-  gap:15px;
+flex-direction:column;
+gap:15px;
+}
+
+nav ul{
+flex-wrap:wrap;
+justify-content:center;
 }
 
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
+
 <nav>
-<div class="logo">ARTIST EMPIRE</div>
+
+<div class="logo">
+ARTIST EMPIRE
+</div>
 
 <ul>
 <li><a href="#about">About</a></li>
@@ -232,7 +255,9 @@ nav{
 <li><a href="#signup">Signup</a></li>
 <li><a href="#contact">Contact</a></li>
 </ul>
+
 </nav>
+
 </header>
 
 <section class="hero">
@@ -243,7 +268,7 @@ nav{
 The indie artist ecosystem for music, merch, streams, exposure, and direct fan support.
 </p>
 
-<div class="buttons">
+<div class="hero-buttons">
 
 <a href="#pricing" class="btn btn-primary">
 Join Now
@@ -264,8 +289,8 @@ Explore Features
 <div class="card">
 
 <p>
-ArtistEmpire.live gives independent artists the tools to build their music business without a major label.
-Sell music, sell merch, livestream, build a fanbase, and keep control of your brand.
+ArtistEmpire.live helps independent artists build their brand without major labels.
+Upload music, promote videos, sell merch, connect with fans, and grow your empire independently.
 </p>
 
 </div>
@@ -280,7 +305,7 @@ Sell music, sell merch, livestream, build a fanbase, and keep control of your br
 
 <div class="card">
 <h3>Upload Music</h3>
-<p>Promote singles, albums, mixtapes, and audio previews.</p>
+<p>Promote songs, mixtapes, albums, and previews.</p>
 </div>
 
 <div class="card">
@@ -290,17 +315,17 @@ Sell music, sell merch, livestream, build a fanbase, and keep control of your br
 
 <div class="card">
 <h3>Artist Profiles</h3>
-<p>Create a custom artist page with your music and links.</p>
+<p>Create your own custom artist page and fan hub.</p>
 </div>
 
 <div class="card">
 <h3>Video Promotion</h3>
-<p>Promote music videos and livestream events.</p>
+<p>Promote music videos and livestream performances.</p>
 </div>
 
 <div class="card">
 <h3>Direct Fan Support</h3>
-<p>Get paid directly from fans with Stripe payments.</p>
+<p>Get paid directly through Stripe payment links.</p>
 </div>
 
 <div class="card">
@@ -324,7 +349,9 @@ Sell music, sell merch, livestream, build a fanbase, and keep control of your br
 
 <div class="price">$20</div>
 
-<p>Perfect for independent artists starting out.</p>
+<p>
+Perfect for solo artists building their fanbase.
+</p>
 
 <br>
 
@@ -340,7 +367,9 @@ Join Artist Plan
 
 <div class="price">$40</div>
 
-<p>For labels and teams managing multiple artists.</p>
+<p>
+For labels and teams managing multiple artists.
+</p>
 
 <br>
 
@@ -356,7 +385,9 @@ Join Label Plan
 
 <div class="price">$99</div>
 
-<p>For serious creators building a full music empire.</p>
+<p>
+For creators building a serious independent business.
+</p>
 
 <br>
 
@@ -405,7 +436,7 @@ Submit Artist Application
 <li>Add Merch</li>
 <li>Manage Fan Subscribers</li>
 <li>View Streams</li>
-<li>View Revenue</li>
+<li>Track Revenue</li>
 <li>Promote Videos</li>
 </ul>
 
@@ -449,9 +480,17 @@ Email: artistempirelive@gmail.com
 
 function startCheckout(plan){
 
-alert(
-"You clicked the " + plan + " plan.\\n\\nNext step:\\nConnect your Stripe Payment Link or backend API."
-);
+if(plan === 'artist'){
+window.location.href='https://buy.stripe.com/4gM8wPcdx6kmaICfkf3VC00';
+}
+
+if(plan === 'label'){
+window.location.href='https://buy.stripe.com/bJe14n5P9aAC4ke6NJ3VC01';
+}
+
+if(plan === 'empire'){
+window.location.href='https://buy.stripe.com/14A28relF7oqg2W2xt3VC03';
+}
 
 }
 
@@ -459,9 +498,7 @@ document.getElementById("signupForm").addEventListener("submit", function(e){
 
 e.preventDefault();
 
-alert(
-"Artist application submitted successfully."
-);
+alert("Artist application submitted successfully.");
 
 });
 
