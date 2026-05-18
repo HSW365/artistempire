@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HSW365stream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #050505;
+    --bg2: #0d0d0d;
+    --bg3: #111111;
+    --border: rgba(255,255,255,0.07);
+    --indigo: #6366f1;
+    --indigo-dark: #4f46e5;
+    --indigo-glow: rgba(99,102,241,0.25);
+    --pink: #ec4899;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --text: #ffffff;
+    --text2: #a1a1aa;
+    --text3: #52525b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden}
+  button{cursor:pointer;border:none;background:none;color:inherit;font-family:inherit}
+  input{font-family:inherit;color:var(--text)}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px}
+
+  /* ─── LAYOUT ─── */
+  #app{display:flex;flex-direction:column;height:100vh}
+  #topnav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    height:58px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;
+    background:linear-gradient(to bottom,rgba(5,5,5,0.95),transparent);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:-0.5px}
+  .logo span{color:var(--indigo)}
+  .nav-links{display:flex;gap:2px}
+  .nav-btn{
+    display:flex;align-items:center;gap:6px;padding:7px 14px;
+    border-radius:12px;font-size:13px;font-weight:700;
+    color:var(--text2);transition:all .2s;white-space:nowrap;
+  }
+  .nav-btn:hover{color:var(--text);background:rgba(255,255,255,0.08)}
+  .nav-btn.active{color:var(--text);background:var(--indigo);box-shadow:0 4px 16px var(--indigo-glow)}
+  .nav-icon{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center}
+  .nav-right{display:flex;align-items:center;gap:8px}
+  .icon-btn{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    color:var(--text2);transition:all .2s;position:relative;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.08);color:var(--text)}
+  .avatar-btn{width:32px;height:32px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-center:center;overflow:hidden}
+  .badge{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg)}
+  #main{flex:1;margin-top:58px;overflow-y:auto;overflow-x:hidden;height:calc(100vh - 58px)}
+
+  /* ─── HAMBURGER (mobile) ─── */
+  #hamburger{display:none}
+  #mobile-drawer{
+    position:fixed;top:0;left:0;height:100%;width:240px;
+    background:var(--bg2);border-right:1px solid var(--border);
+    z-index:200;transform:translateX(-100%);transition:transform .3s;
+    display:flex;flex-direction:column;
+  }
+  #mobile-drawer.open{transform:translateX(0)}
+  #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:190;display:none}
+  #drawer-overlay.open{display:block}
+  .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:16px;height:58px;border-bottom:1px solid var(--border)}
+  .drawer-nav{padding:12px;display:flex;flex-direction:column;gap:4px}
+  .drawer-nav-btn{
+    display:flex;align-items:center;gap:10px;padding:11px 14px;
+    border-radius:12px;font-size:14px;font-weight:700;color:var(--text2);
+    transition:all .2s;text-align:left;width:100%;
+  }
+  .drawer-nav-btn:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+  .drawer-nav-btn.active{color:var(--text);background:var(--indigo)}
+
+  /* ─── VIEWS ─── */
+  .view{display:none;min-height:100%}
+  .view.active{display:block}
+
+  /* ─── HOME ─── */
+  #hero{
+    position:relative;height:88vh;display:flex;align-items:flex-end;
+    padding:0 48px 96px;overflow:hidden;
+  }
+  #hero img.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero-grad1{position:absolute;inset:0;background:linear-gradient(to top,#050505 0%,rgba(5,5,5,0.2) 50%,transparent 100%)}
+  .hero-grad2{position:absolute;inset:0;background:linear-gradient(to right,rgba(5,5,5,0.65) 0%,transparent 60%)}
+  .hero-content{position:relative;z-index:10;max-width:700px}
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.12);border-radius:20px;
+    padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:0.15em;
+    text-transform:uppercase;color:rgba(255,255,255,0.8);margin-bottom:20px;
+  }
+  .hero-badge-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pulse 1.5s infinite}
+  .hero-title{
+    font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;
+    font-size:clamp(56px,9vw,110px);line-height:0.88;letter-spacing:-1px;
+    margin-bottom:20px;
+  }
+  .hero-title span{
+    display:block;background:linear-gradient(135deg,var(--indigo),#a855f7,var(--pink));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .hero-desc{font-size:16px;color:rgba(255,255,255,0.75);line-height:1.6;max-width:480px;margin-bottom:32px;font-weight:500}
+  .hero-btns{display:flex;gap:16px;flex-wrap:wrap}
+  .btn-primary{
+    display:flex;align-items:center;gap:10px;padding:14px 28px;
+    background:#fff;color:#000;font-weight:900;font-size:14px;border-radius:16px;
+    transition:all .2s;box-shadow:0 16px 40px rgba(255,255,255,0.12);
+  }
+  .btn-primary:hover{background:#e0e7ff;transform:translateY(-2px)}
+  .btn-secondary{
+    display:flex;align-items:center;gap:10px;padding:14px 28px;
+    background:rgba(255,255,255,0.09);backdrop-filter:blur(12px);color:#fff;
+    font-weight:900;font-size:14px;border-radius:16px;border:1px solid rgba(255,255,255,0.15);
+    transition:all .2s;
+  }
+  .btn-secondary:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px)}
+  .hero-stats{
+    position:absolute;right:48px;bottom:80px;z-index:10;text-align:right;
+  }
+  .hero-stats-num{
+    font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:42px;
+    letter-spacing:-1px;
+  }
+  .hero-stats-num span{color:var(--indigo)}
+  .hero-stats-label{font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.15em;text-transform:uppercase}
+  .content-sections{position:relative;z-index:20;margin-top:-60px;padding-bottom:80px}
+
+  /* ─── NETFLIX SECTION ─── */
+  .section-wrap{padding:16px 24px}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.02em}
+  .scroll-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+  .scroll-row::-webkit-scrollbar{display:none}
+  .card{
+    flex-shrink:0;width:240px;border-radius:16px;overflow:hidden;
+    background:var(--bg3);border:1px solid var(--border);
+    transition:all .3s;cursor:pointer;
+  }
+  .card:hover{transform:scale(1.04);border-color:rgba(99,102,241,0.5)}
+  .card-thumb{position:relative;height:136px;overflow:hidden}
+  .card-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .card:hover .card-thumb img{transform:scale(1.08)}
+  .card-thumb-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent)}
+  .card-dur{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px}
+  .card-play{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .2s;
+  }
+  .card:hover .card-play{opacity:1}
+  .play-circle{
+    width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card-body{padding:12px}
+  .card-title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+  .card-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)}
+  .card-creator{display:flex;align-items:center;gap:7px;margin-top:9px}
+  .card-creator img{width:20px;height:20px;border-radius:50%}
+  .card-creator span{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ─── AD BANNER ─── */
+  .ad-banner{
+    margin:8px 24px 24px;padding:28px 32px;
+    background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(168,85,247,0.12));
+    border:1px solid rgba(255,255,255,0.08);border-radius:28px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    position:relative;overflow:hidden;flex-wrap:wrap;
+  }
+  .ad-glow{position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(99,102,241,0.08);border-radius:50%;filter:blur(60px);pointer-events:none}
+  .ad-left{display:flex;align-items:center;gap:20px}
+  .ad-logo{width:60px;height:60px;background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#000;flex-shrink:0}
+  .ad-tag{font-size:10px;background:var(--indigo);color:#fff;padding:2px 8px;border-radius:4px;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;display:inline-block}
+  .ad-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:22px}
+  .ad-sub{font-size:13px;color:var(--text2);margin-top:4px}
+  .ad-cta{background:#fff;color:#000;padding:12px 28px;border-radius:14px;font-weight:900;font-size:13px;transition:all .2s;flex-shrink:0}
+  .ad-cta:hover{background:#e0e7ff;transform:scale(1.03)}
+
+  /* ─── LIVE VIEW ─── */
+  #view-live{display:none}
+  #view-live.active{display:flex;height:100%}
+  .live-player{flex:1;position:relative;overflow:hidden;background:#000}
+  .live-player img{width:100%;height:100%;object-fit:cover;opacity:0.85}
+  .live-badge{position:absolute;top:24px;left:24px;display:flex;align-items:center;gap:10px}
+  .live-dot{background:var(--red);color:#fff;font-size:11px;font-weight:900;padding:5px 10px;border-radius:8px;display:flex;align-items:center;gap:6px;letter-spacing:0.05em}
+  .live-dot::before{content:'';width:8px;height:8px;background:#fff;border-radius:50%;animation:pulse 1.2s infinite}
+  .live-count{background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)}
+  .live-info{position:absolute;bottom:40px;left:32px;max-width:480px}
+  .live-now{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .live-now-dot{width:10px;height:10px;background:var(--indigo);border-radius:50%;animation:pulse 1.5s infinite}
+  .live-now-label{font-size:10px;font-weight:900;color:var(--indigo);letter-spacing:0.3em;text-transform:uppercase}
+  .live-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(28px,4vw,44px);letter-spacing:-0.5px;margin-bottom:8px}
+  .live-sub{font-size:15px;color:rgba(255,255,255,0.75)}
+  /* Chat panel */
+  .chat-panel{width:300px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%}
+  .chat-header{padding:14px 16px;border-bottom:1px solid var(--border)}
+  .chat-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .chat-title{font-weight:900;font-size:13px;letter-spacing:0.05em}
+  .chat-live-count{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--red)}
+  .chat-live-count::before{content:'';width:7px;height:7px;background:var(--red);border-radius:50%;animation:pulse 1.2s infinite}
+  .chat-creator{font-size:11px;color:var(--text3)}
+  .chat-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+  .chat-msg{display:flex;gap:6px;font-size:12px;line-height:1.4}
+  .chat-user{font-weight:700;flex-shrink:0;font-size:11px}
+  .chat-text{color:rgba(255,255,255,0.78)}
+  .chat-reactions{padding:8px 12px;display:flex;gap:6px;border-top:1px solid var(--border)}
+  .react-btn{flex:1;height:34px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);font-size:14px;transition:all .2s}
+  .react-btn:hover{background:rgba(255,255,255,0.12);transform:scale(1.05)}
+  .chat-input-wrap{padding:10px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03)}
+  .chat-input{
+    flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;
+    padding:7px 12px;font-size:12px;outline:none;transition:border-color .2s;
+  }
+  .chat-input:focus{border-color:rgba(99,102,241,0.5)}
+  .chat-send{
+    width:30px;height:30px;border-radius:8px;background:var(--indigo);display:flex;align-items:center;justify-content:center;
+    transition:all .2s;flex-shrink:0;
+  }
+  .chat-send:hover{background:var(--indigo-dark)}
+
+  /* ─── SHORTS ─── */
+  #view-shorts.active{display:block;height:100%}
+  .shorts-container{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory}
+  .short-card{
+    height:100%;position:relative;scroll-snap-align:start;
+    display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;
+  }
+  .short-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.88}
+  .short-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,transparent 50%)}
+  .short-play-btn{
+    position:relative;z-index:5;width:60px;height:60px;border-radius:50%;
+    background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.25);
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    transition:all .2s;opacity:0.75;
+  }
+  .short-play-btn:hover{opacity:1;transform:scale(1.08)}
+  .short-actions{position:absolute;right:14px;bottom:120px;z-index:10;display:flex;flex-direction:column;gap:20px;align-items:center}
+  .short-action{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .short-action-btn{
+    width:46px;height:46px;border-radius:50%;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;color:#fff;transition:all .2s;
+  }
+  .short-action-btn:hover{background:rgba(255,255,255,0.15)}
+  .short-action-btn.liked{background:rgba(239,68,68,0.3);border-color:rgba(239,68,68,0.5)}
+  .short-action-label{font-size:10px;color:rgba(255,255,255,0.75);font-weight:700}
+  .short-info{position:absolute;bottom:20px;left:14px;right:70px;z-index:10}
+  .short-creator{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .short-creator img{width:38px;height:38px;border-radius:50%;border:2px solid #fff}
+  .short-creator-name{font-weight:900;font-size:13px}
+  .short-creator-follow{padding:4px 12px;background:var(--indigo);border-radius:8px;font-size:11px;font-weight:900;margin-left:6px}
+  .short-title{font-weight:700;font-size:14px;margin-bottom:6px;line-height:1.3}
+  .short-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .short-tag{font-size:11px;color:rgba(99,102,241,0.9);font-weight:700}
+
+  /* ─── STUDIO ─── */
+  .studio-wrap{max-width:860px;margin:0 auto;padding:24px 20px 80px}
+  .page-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:36px;letter-spacing:-0.5px;margin-bottom:4px}
+  .page-sub{color:var(--text2);font-size:14px;margin-bottom:28px}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .stat-card{
+    background:var(--bg3);border:1px solid var(--border);border-radius:20px;
+    padding:16px;transition:border-color .2s;
+  }
+  .stat-card:hover{border-color:rgba(255,255,255,0.15)}
+  .stat-icon{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;font-size:15px;
+  }
+  .stat-icon.indigo{background:rgba(99,102,241,0.12);color:var(--indigo)}
+  .stat-icon.pink{background:rgba(236,72,153,0.12);color:var(--pink)}
+  .stat-icon.green{background:rgba(34,197,94,0.12);color:var(--green)}
+  .stat-icon.yellow{background:rgba(234,179,8,0.12);color:var(--yellow)}
+  .stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-0.5px;margin-bottom:4px}
+  .stat-label{font-size:11px;color:var(--text3);font-weight:600}
+  .dropzone{
+    border:2px dashed rgba(255,255,255,0.1);border-radius:24px;padding:40px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:28px;
+    cursor:pointer;transition:all .2s;background:var(--bg2);
+  }
+  .dropzone:hover,.dropzone.drag{border-color:var(--indigo);background:rgba(99,102,241,0.05)}
+  .drop-icon{
+    width:56px;height:56px;background:rgba(99,102,241,0.15);border-radius:18px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--indigo);
+  }
+  .drop-title{font-weight:900;font-size:16px}
+  .drop-sub{font-size:13px;color:var(--text2)}
+  .upload-btn{
+    padding:11px 24px;background:var(--indigo);color:#fff;border-radius:12px;
+    font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;
+    transition:all .2s;box-shadow:0 8px 24px rgba(99,102,241,0.25);
+  }
+  .upload-btn:hover{background:var(--indigo-dark);transform:translateY(-1px)}
+  .content-list{display:flex;flex-direction:column;gap:10px}
+  .content-item{
+    display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--border);
+    border-radius:18px;padding:14px;transition:border-color .2s;
+  }
+  .content-item:hover{border-color:rgba(255,255,255,0.14)}
+  .content-thumb{width:96px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;position:relative}
+  .content-thumb img{width:100%;height:100%;object-fit:cover}
+  .processing-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center}
+  .spinner{width:18px;height:18px;border:2px solid rgba(99,102,241,0.4);border-top-color:var(--indigo);border-radius:50%;animation:spin 0.8s linear infinite}
+  .content-info{flex:1;min-width:0}
+  .content-title-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .content-name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .status-badge{font-size:10px;font-weight:900;padding:2px 8px;border-radius:6px;flex-shrink:0}
+  .status-badge.live{background:rgba(34,197,94,0.15);color:var(--green)}
+  .status-badge.proc{background:rgba(234,179,8,0.15);color:var(--yellow)}
+  .content-stats{display:flex;gap:16px;font-size:11px;color:var(--text3)}
+  .content-actions{display:flex;gap:6px}
+  .action-btn{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .2s;font-size:13px}
+  .action-btn:hover{background:rgba(255,255,255,0.12);color:var(--text)}
+
+  /* ─── MESSAGES ─── */
+  #view-messages.active{display:flex;height:100%}
+  .dm-sidebar{width:300px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%}
+  .dm-header{padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+  .dm-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;margin-bottom:12px}
+  .search-box{position:relative}
+  .search-box input{
+    width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);
+    border-radius:12px;padding:8px 12px 8px 34px;font-size:13px;outline:none;
+    color:var(--text);transition:border-color .2s;
+  }
+  .search-box input::placeholder{color:var(--text3)}
+  .search-box input:focus{border-color:rgba(99,102,241,0.4)}
+  .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3)}
+  .dm-list{flex:1;overflow-y:auto}
+  .dm-item{
+    display:flex;align-items:center;gap:12px;padding:14px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+    transition:background .15s;position:relative;
+  }
+  .dm-item:hover{background:rgba(255,255,255,0.04)}
+  .dm-item.active{background:rgba(99,102,241,0.08);border-left:2px solid var(--indigo)}
+  .dm-avatar{position:relative;flex-shrink:0}
+  .dm-avatar img{width:42px;height:42px;border-radius:50%}
+  .online-dot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;background:var(--green);border-radius:50%;border:2px solid var(--bg2)}
+  .dm-info{flex:1;min-width:0}
+  .dm-name-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+  .dm-name{font-weight:700;font-size:13px}
+  .dm-time{font-size:10px;color:var(--text3)}
+  .dm-preview{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-unread{width:18px;height:18px;background:var(--indigo);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-left:6px}
+  .dm-chat{flex:1;display:flex;flex-direction:column;background:var(--bg);height:100%}
+  .dm-chat-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+  .dm-chat-user{display:flex;align-items:center;gap:12px}
+  .dm-chat-user img{width:36px;height:36px;border-radius:50%}
+  .dm-chat-name{font-weight:700;font-size:14px}
+  .dm-chat-status{font-size:11px;color:var(--text3)}
+  .dm-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+  .msg-row{display:flex}
+  .msg-row.me{justify-content:flex-end}
+  .msg-bubble{
+    max-width:72%;padding:10px 14px;border-radius:18px;font-size:13px;font-weight:500;line-height:1.5;
+  }
+  .msg-row.them .msg-bubble{background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px}
+  .msg-row.me .msg-bubble{background:var(--indigo);border-bottom-right-radius:4px}
+  .msg-time{font-size:10px;color:var(--text3);margin-top:4px;display:flex;align-items:center;gap:3px}
+  .dm-input-row{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .dm-input{
+    flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:14px;
+    padding:10px 16px;font-size:13px;outline:none;color:var(--text);transition:border-color .2s;
+  }
+  .dm-input:focus{border-color:rgba(99,102,241,0.5)}
+  .dm-send{
+    width:38px;height:38px;border-radius:12px;background:var(--indigo);
+    display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;
+  }
+  .dm-send:hover{background:var(--indigo-dark)}
+  .dm-send:disabled{opacity:0.3;cursor:not-allowed}
+
+  /* ─── PLANS ─── */
+  .plans-wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;text-align:center}
+  .plans-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.1);
+    border:1px solid rgba(99,102,241,0.2);color:rgba(99,102,241,0.9);
+    font-size:11px;font-weight:900;padding:5px 16px;border-radius:20px;
+    letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px;
+  }
+  .plans-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(36px,6vw,64px);letter-spacing:-1px;margin-bottom:12px}
+  .plans-title span{background:linear-gradient(135deg,var(--indigo),#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .plans-sub{color:var(--text2);margin-bottom:28px;font-size:15px}
+  .toggle-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:36px}
+  .toggle-label{font-size:14px;font-weight:700}
+  .toggle-label.inactive{color:var(--text3)}
+  .toggle-switch{
+    position:relative;width:48px;height:26px;border-radius:13px;
+    background:rgba(255,255,255,0.1);cursor:pointer;transition:background .2s;border:none;
+  }
+  .toggle-switch.on{background:var(--indigo)}
+  .toggle-knob{
+    position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+    background:#fff;transition:transform .2s;pointer-events:none;
+  }
+  .toggle-switch.on .toggle-knob{transform:translateX(22px)}
+  .save-badge{background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:900;padding:3px 10px;border-radius:20px}
+  .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left}
+  .plan-card{
+    border-radius:28px;border:1px solid var(--border);padding:24px;
+    background:var(--bg2);cursor:pointer;transition:all .3s;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .plan-card:hover{border-color:rgba(255,255,255,0.15)}
+  .plan-card.selected{border-color:var(--indigo);background:rgba(99,102,241,0.05);box-shadow:0 20px 50px rgba(99,102,241,0.1);transform:scale(1.02)}
+  .plan-popular{
+    position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--indigo);color:#fff;font-size:10px;font-weight:900;
+    padding:4px 14px;border-radius:20px;letter-spacing:0.1em;white-space:nowrap;
+  }
+  .plan-icon{
+    width:48px;height:48px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;margin-bottom:16px;
+  }
+  .plan-icon.gray{background:rgba(255,255,255,0.07)}
+  .plan-icon.indigo{background:rgba(99,102,241,0.15)}
+  .plan-icon.yellow{background:rgba(234,179,8,0.15)}
+  .plan-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;letter-spacing:-0.3px}
+  .plan-tagline{font-size:12px;color:var(--text3);margin-bottom:18px}
+  .plan-price{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:40px;letter-spacing:-1px;margin-bottom:6px}
+  .plan-price span{font-size:14px;color:var(--text2);font-weight:600;letter-spacing:0}
+  .plan-period{font-size:12px;color:var(--green);margin-bottom:20px;font-weight:700;min-height:16px}
+  .plan-features{flex:1;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+  .plan-feature{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:rgba(255,255,255,0.82)}
+  .feature-check{color:var(--indigo);flex-shrink:0;font-size:12px;margin-top:1px}
+  .plan-cta{
+    width:100%;padding:12px;border-radius:16px;font-weight:900;font-size:14px;transition:all .2s;
+  }
+  .plan-cta.active{background:var(--indigo);color:#fff;box-shadow:0 8px 24px rgba(99,102,241,0.25)}
+  .plan-cta.inactive{background:rgba(255,255,255,0.07);color:var(--text)}
+  .plan-cta:hover{opacity:0.9;transform:translateY(-1px)}
+  .plans-note{font-size:12px;color:var(--text3);margin-top:24px}
+
+  /* ─── BUSINESS ─── */
+  .business-wrap{max-width:1000px;margin:0 auto;padding:24px 20px 80px}
+  .biz-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+  .export-btn{
+    display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:12px;
+    background:rgba(255,255,255,0.06);border:1px solid var(--border);
+    font-size:13px;font-weight:700;transition:all .2s;
+  }
+  .export-btn:hover{background:rgba(255,255,255,0.1)}
+  .tabs{display:flex;gap:2px;background:rgba(255,255,255,0.05);border-radius:16px;padding:4px;width:fit-content;margin-bottom:24px}
+  .tab-btn{padding:8px 20px;border-radius:12px;font-size:13px;font-weight:700;color:var(--text2);transition:all .2s;text-transform:capitalize}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:var(--indigo);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,0.2)}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+  .kpi-card{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:16px;transition:border-color .2s}
+  .kpi-card:hover{border-color:rgba(255,255,255,0.14)}
+  .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .kpi-icon{width:32px;height:32px;border-radius:10px;background:rgba(99,102,241,0.1);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .kpi-delta{font-size:12px;font-weight:700;display:flex;align-items:center;gap:2px}
+  .kpi-delta.up{color:var(--green)}
+  .kpi-delta.down{color:var(--red)}
+  .kpi-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-0.5px;margin-bottom:4px}
+  .kpi-label{font-size:11px;color:var(--text3);font-weight:600}
+  .chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:20px}
+  .chart-title{font-weight:900;font-size:16px;margin-bottom:20px;letter-spacing:-0.2px}
+  .bar-chart{display:flex;align-items:flex-end;gap:10px;height:120px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .bar-amt{font-size:10px;font-weight:700;color:var(--text2)}
+  .bar{
+    width:100%;border-radius:6px 6px 0 0;
+    background:linear-gradient(to top,var(--indigo),rgba(99,102,241,0.5));
+    transition:all .3s;cursor:pointer;
+  }
+  .bar:hover{filter:brightness(1.2)}
+  .bar-month{font-size:10px;color:var(--text3);font-weight:600}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .pie-row{display:flex;flex-direction:column;gap:12px}
+  .pie-item{display:flex;flex-direction:column;gap:6px}
+  .pie-label{display:flex;justify-content:space-between;font-size:13px}
+  .pie-label span:last-child{color:var(--text2);font-size:12px}
+  .bar-track{height:6px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .5s}
+  .region-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .region-name{font-size:13px;color:rgba(255,255,255,0.8);width:110px;flex-shrink:0}
+  .region-pct{font-size:11px;color:var(--text3);width:28px;text-align:right;flex-shrink:0}
+  .content-table{overflow:hidden}
+  .table-header{display:grid;grid-template-columns:1fr 100px 100px;gap:12px;padding:10px 20px;font-size:11px;font-weight:900;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+  .table-row{display:grid;grid-template-columns:1fr 100px 100px;gap:12px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s;align-items:center}
+  .table-row:hover{background:rgba(255,255,255,0.025)}
+  .table-title{font-weight:700;font-size:13px}
+  .table-delta{font-size:11px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:3px}
+  .audience-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .big-stat{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0}
+  .big-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:60px;color:var(--indigo);letter-spacing:-2px}
+  .big-stat-sub{color:var(--text3);font-size:13px;margin-top:4px}
+  .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .mini-stat{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px;text-align:center}
+  .mini-stat-val{font-weight:900;font-size:16px;margin-bottom:3px}
+  .mini-stat-label{font-size:10px;color:var(--text3)}
+
+  /* ─── KEYFRAMES ─── */
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .anim-in{animation:fadeIn .4s ease forwards}
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:900px){
+    .nav-links{display:none}
+    #hamburger{display:flex}
+    .hero-stats{display:none}
+    .plans-grid{grid-template-columns:1fr}
+    .plan-card.selected{transform:none}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .two-col,.audience-grid{grid-template-columns:1fr}
+    #hero{padding:0 20px 80px}
+    .chat-panel{width:260px}
+  }
+  @media(max-width:600px){
+    .dm-chat{display:none}
+    .dm-sidebar{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav id="topnav">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button id="hamburger" class="icon-btn" onclick="toggleDrawer()" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="logo">HSW365<span>stream</span></div>
+  </div>
+  <div class="nav-links" id="desktop-nav"></div>
+  <div class="nav-right">
+    <button class="icon-btn" title="Search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="icon-btn" title="Notifications">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge"></span>
+    </button>
+    <button class="avatar-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<aside id="mobile-drawer">
+  <div class="drawer-header">
+    <div class="logo" style="font-size:18px">HSW365<span>stream</span></div>
+    <button class="icon-btn" onclick="closeDrawer()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="drawer-nav" id="drawer-nav"></nav>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- HOME -->
+  <div id="view-home" class="view active">
+    <div id="hero">
+      <img class="hero-bg" src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=1920&q=80" alt="hero"/>
+      <div class="hero-grad1"></div>
+      <div class="hero-grad2"></div>
+      <div class="hero-content anim-in">
+        <div class="hero-badge"><span class="hero-badge-dot"></span> HSW365stream Original · Worldwide</div>
+        <h1 class="hero-title">VELOCITY<span>X SERIES</span></h1>
+        <p class="hero-desc">Witness the world's most influential creators push the limits of fashion, film, and digital art in an interactive survival competition.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="switchView('live')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="red"/></svg>
+            WATCH PREMIERE
+          </button>
+          <button class="btn-secondary" onclick="switchView('plans')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            UPGRADE TO PRO
+          </button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div style="display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:900;letter-spacing:0.2em;color:var(--indigo);text-transform:uppercase">Live</span>
+          <div style="display:flex">
+            <img src="https://i.pravatar.cc/60?u=1" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--indigo);margin-left:-6px" alt=""/>
+            <img src="https://i.pravatar.cc/60?u=2" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--indigo);margin-left:-6px" alt=""/>
+            <img src="https://i.pravatar.cc/60?u=3" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--indigo);margin-left:-6px" alt=""/>
+          </div>
+        </div>
+        <div class="hero-stats-num">24.8M <span>LIVE</span></div>
+        <div class="hero-stats-label">watching right now</div>
+      </div>
+    </div>
+    <div class="content-sections">
+      <div class="section-wrap">
+        <div class="section-header"><div class="section-title">🎬 HSW365stream Premiere Films</div></div>
+        <div class="scroll-row" id="films-row"></div>
+      </div>
+      <div class="ad-banner">
+        <div class="ad-glow"></div>
+        <div class="ad-left">
+          <div class="ad-logo">CF</div>
+          <div>
+            <div class="ad-tag">Sponsored</div>
+            <div class="ad-name">CYBERFIT COLLECTIVE</div>
+            <div class="ad-sub">Digital fashion for the ultra-creator. Unlock Summer '25 skin pack today.</div>
+          </div>
+        </div>
+        <button class="ad-cta">VIEW SHOP</button>
+      </div>
+      <div class="section-wrap">
+        <div class="section-header"><div class="section-title">⚡ Viral Flashes</div></div>
+        <div class="scroll-row" id="shorts-row"></div>
+      </div>
+      <div class="section-wrap">
+        <div class="section-header"><div class="section-title">📺 Original Series</div></div>
+        <div class="scroll-row" id="series-row"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE -->
+  <div id="view-live" class="view">
+    <div class="live-player">
+      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=80" alt="live"/>
+      <div class="live-badge">
+        <div class="live-dot">ULTRA HD LIVE</div>
+        <div class="live-count">14.2M Watching Now</div>
+      </div>
+      <div class="live-info">
+        <div class="live-now"><div class="live-now-dot"></div><span class="live-now-label">Currently On Air</span></div>
+        <div class="live-title">Directing the Future</div>
+        <div class="live-sub">Kaelen Vance reveals unseen footage of Tokyo 2088.</div>
+      </div>
+    </div>
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-header-top">
+          <div class="chat-title">LIVE CHAT</div>
+          <div class="chat-live-count" id="live-count-label">14.2M watching</div>
+        </div>
+        <div class="chat-creator">Kaelen Vance is live</div>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-reactions">
+        <button class="react-btn" onclick="sendReaction('❤️')">❤️</button>
+        <button class="react-btn" onclick="sendReaction('⚡')">⚡</button>
+        <button class="react-btn" onclick="sendReaction('⭐')">⭐</button>
+        <button class="react-btn" onclick="sendReaction('🎁')">🎁</button>
+      </div>
+      <div class="chat-input-wrap">
+        <input class="chat-input" id="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHORTS -->
+  <div id="view-shorts" class="view">
+    <div class="shorts-container" id="shorts-container"></div>
+  </div>
+
+  <!-- STUDIO -->
+  <div id="view-studio" class="view">
+    <div class="studio-wrap anim-in">
+      <div class="page-title">Creator Studio</div>
+      <div class="page-sub">Manage, upload, and track your content performance.</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon indigo">👁</div><div class="stat-val">2.09M</div><div class="stat-label">Total Views</div></div>
+        <div class="stat-card"><div class="stat-icon pink">❤️</div><div class="stat-val">760K</div><div class="stat-label">Total Likes</div></div>
+        <div class="stat-card"><div class="stat-icon green">💵</div><div class="stat-val">$6,050</div><div class="stat-label">Est. Revenue</div></div>
+        <div class="stat-card"><div class="stat-icon yellow">🎬</div><div class="stat-val">3</div><div class="stat-label">Uploads</div></div>
+      </div>
+      <div class="dropzone" id="dropzone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag')">
+        <div class="drop-icon">⬆️</div>
+        <div class="drop-title">Drop your file here</div>
+        <div class="drop-sub">MP4, MOV, AVI — up to 4K · 10GB max</div>
+        <button class="upload-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Choose File
+        </button>
+      </div>
+      <div style="font-weight:900;font-size:16px;margin-bottom:14px;letter-spacing:-0.2px">Your Content</div>
+      <div class="content-list">
+        <div class="content-item">
+          <div class="content-thumb"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&q=60" alt=""/></div>
+          <div class="content-info">
+            <div class="content-title-row"><div class="content-name">Neon Odyssey: Director Cut</div><div class="status-badge live">✓ Published</div></div>
+            <div class="content-stats"><span>👁 1.2M</span><span>❤️ 450K</span><span>💵 $3,840</span></div>
+          </div>
+          <div class="content-actions"><button class="action-btn">📊</button><button class="action-btn">⋯</button></div>
+        </div>
+        <div class="content-item">
+          <div class="content-thumb"><img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=200&q=60" alt=""/></div>
+          <div class="content-info">
+            <div class="content-title-row"><div class="content-name">Velocity X — Teaser Trailer</div><div class="status-badge live">✓ Published</div></div>
+            <div class="content-stats"><span>👁 890K</span><span>❤️ 310K</span><span>💵 $2,210</span></div>
+          </div>
+          <div class="content-actions"><button class="action-btn">📊</button><button class="action-btn">⋯</button></div>
+        </div>
+        <div class="content-item">
+          <div class="content-thumb">
+            <img src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=200&q=60" alt=""/>
+            <div class="processing-overlay"><div class="spinner"></div></div>
+          </div>
+          <div class="content-info">
+            <div class="content-title-row"><div class="content-name">Behind The Scenes: Spring Tour</div><div class="status-badge proc">⏳ Processing</div></div>
+            <div class="content-stats"><span>Just uploaded</span></div>
+          </div>
+          <div class="content-actions"><button class="action-btn">⋯</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div id="view-messages" class="view">
+    <div class="dm-sidebar">
+      <div class="dm-header">
+        <div class="dm-title">Messages</div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input placeholder="Search conversations..." id="dm-search" oninput="filterDMs()"/>
+        </div>
+      </div>
+      <div class="dm-list" id="dm-list"></div>
+    </div>
+    <div class="dm-chat">
+      <div class="dm-chat-header">
+        <div class="dm-chat-user" id="dm-chat-user-info"></div>
+        <button class="action-btn">⋯</button>
+      </div>
+      <div class="dm-messages" id="dm-messages"></div>
+      <div class="dm-input-row">
+        <input class="dm-input" id="dm-input" placeholder="Send a message..." onkeydown="if(event.key==='Enter')sendDM()"/>
+        <button class="dm-send" id="dm-send-btn" onclick="sendDM()" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANS -->
+  <div id="view-plans" class="view">
+    <div class="plans-wrap anim-in">
+      <div class="plans-eyebrow">⚡ Upgrade Your Experience</div>
+      <h1 class="plans-title">Choose Your <span>Plan</span></h1>
+      <p class="plans-sub">Join millions of creators and fans on the platform built for the culture.</p>
+      <div class="toggle-wrap">
+        <span class="toggle-label" id="monthly-label">Monthly</span>
+        <button class="toggle-switch" id="billing-toggle" onclick="toggleBilling()"><div class="toggle-knob"></div></button>
+        <span class="toggle-label inactive" id="annual-label">Annual <span class="save-badge">Save 23%</span></span>
+      </div>
+      <div class="plans-grid" id="plans-grid"></div>
+      <p class="plans-note">Cancel anytime · No hidden fees · Secure checkout via Stripe</p>
+    </div>
+  </div>
+
+  <!-- BUSINESS -->
+  <div id="view-business" class="view">
+    <div class="business-wrap anim-in">
+      <div class="biz-header">
+        <div>
+          <div class="page-title">Business Center</div>
+          <div class="page-sub">Revenue, growth, and audience analytics.</div>
+        </div>
+        <button class="export-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this,'overview')">Overview</button>
+        <button class="tab-btn" onclick="switchTab(this,'content')">Content</button>
+        <button class="tab-btn" onclick="switchTab(this,'audience')">Audience</button>
+      </div>
+      <!-- OVERVIEW -->
+      <div id="biz-overview">
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon">💵</div><div class="kpi-delta up">↑ +26%</div></div><div class="kpi-val">$6,050</div><div class="kpi-label">Revenue (Apr)</div></div>
+          <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon">📈</div><div class="kpi-delta up">↑ +74%</div></div><div class="kpi-val">2.09M</div><div class="kpi-label">Total Views</div></div>
+          <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon">👥</div><div class="kpi-delta up">↑ +12%</div></div><div class="kpi-val">48.2K</div><div class="kpi-label">Subscribers</div></div>
+          <div class="kpi-card"><div class="kpi-top"><div class="kpi-icon">⏱</div><div class="kpi-delta down">↓ -3%</div></div><div class="kpi-val">6m 22s</div><div class="kpi-label">Avg. Watch Time</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Monthly Revenue</div>
+          <div class="bar-chart" id="rev-chart"></div>
+        </div>
+        <div class="two-col">
+          <div class="chart-card">
+            <div class="chart-title">Revenue Sources</div>
+            <div class="pie-row">
+              <div class="pie-item"><div class="pie-label"><span>Subscriptions</span><span>$3,751 (62%)</span></div><div class="bar-track"><div class="bar-fill" style="width:62%;background:var(--indigo)"></div></div></div>
+              <div class="pie-item"><div class="pie-label"><span>Ad Revenue</span><span>$1,452 (24%)</span></div><div class="bar-track"><div class="bar-fill" style="width:24%;background:#a855f7"></div></div></div>
+              <div class="pie-item"><div class="pie-label"><span>Tips & Gifts</span><span>$847 (14%)</span></div><div class="bar-track"><div class="bar-fill" style="width:14%;background:var(--pink)"></div></div></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">🌍 Top Regions</div>
+            <div id="regions"></div>
+          </div>
+        </div>
+      </div>
+      <!-- CONTENT TAB -->
+      <div id="biz-content" style="display:none">
+        <div class="chart-card content-table">
+          <div class="table-header"><span>Content</span><span>Views</span><span>Revenue</span></div>
+          <div class="table-row"><div><div class="table-title">Neon Odyssey: Director Cut</div><div class="table-delta">↑ +12% this week</div></div><span style="font-size:13px">1.2M</span><span style="font-size:13px;color:var(--green)">$3,840</span></div>
+          <div class="table-row"><div><div class="table-title">Velocity X — Teaser</div><div class="table-delta">↑ +8% this week</div></div><span style="font-size:13px">890K</span><span style="font-size:13px;color:var(--green)">$2,210</span></div>
+          <div class="table-row"><div><div class="table-title">Spring Tour BTS</div><div style="font-size:11px;color:var(--text3)">Processing</div></div><span style="font-size:13px;color:var(--text3)">—</span><span style="font-size:13px;color:var(--text3)">—</span></div>
+        </div>
+      </div>
+      <!-- AUDIENCE TAB -->
+      <div id="biz-audience" style="display:none">
+        <div class="audience-grid">
+          <div class="chart-card">
+            <div class="chart-title">Age Distribution</div>
+            <div class="pie-row">
+              <div class="pie-item"><div class="pie-label"><span>18–24</span><span>42%</span></div><div class="bar-track"><div class="bar-fill" style="width:42%;background:var(--indigo)"></div></div></div>
+              <div class="pie-item"><div class="pie-label"><span>25–34</span><span>33%</span></div><div class="bar-track"><div class="bar-fill" style="width:33%;background:var(--indigo)"></div></div></div>
+              <div class="pie-item"><div class="pie-label"><span>35–44</span><span>15%</span></div><div class="bar-track"><div class="bar-fill" style="width:15%;background:var(--indigo)"></div></div></div>
+              <div class="pie-item"><div class="pie-label"><span>45+</span><span>10%</span></div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--indigo)"></div></div></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">⚡ Engagement Rate</div>
+            <div class="big-stat">
+              <div class="big-stat-val">8.4%</div>
+              <div class="big-stat-sub">Avg. across all content</div>
+              <div style="color:var(--green);font-size:12px;font-weight:700;margin-top:6px">↑ +2.1% vs last month</div>
+            </div>
+            <div class="mini-stats">
+              <div class="mini-stat"><div class="mini-stat-val">18%</div><div class="mini-stat-label">Likes/View</div></div>
+              <div class="mini-stat"><div class="mini-stat-val">3.2%</div><div class="mini-stat-label">Comments</div></div>
+              <div class="mini-stat"><div class="mini-stat-val">4.1%</div><div class="mini-stat-label">Shares</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #main -->
+
+<script>
+// ── DATA ──
+const VIEWS = ['home','live','shorts','studio','messages','plans','business'];
+const NAV_LABELS = {home:'Home',live:'Live',shorts:'Shorts',studio:'Studio',messages:'Messages',plans:'Plans',business:'Business'};
+const NAV_ICONS = {
+  home:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  live:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>',
+  shorts:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  studio:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>',
+  messages:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  plans:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+  business:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+};
+
+const VIDEOS = [
+  {id:'1',title:'Neon Odyssey: The Last Director',thumb:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=70',dur:'2h 14m',views:'1.2M',likes:'450K',type:'movie',creator:'Kaelen Vance',avatar:'https://i.pravatar.cc/60?u=c1'},
+  {id:'2',title:'Echoes of Fashion: Spring 2025',thumb:'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&q=70',dur:'45m',views:'890K',likes:'310K',type:'series',creator:'Zoe Aris',avatar:'https://i.pravatar.cc/60?u=c2'},
+  {id:'3',title:'Velocity X: Behind The Lens',thumb:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&q=70',dur:'1h 22m',views:'2.1M',likes:'780K',type:'movie',creator:'HSW365',avatar:'https://i.pravatar.cc/60?u=hsw'},
+  {id:'s1',title:'POV: You missed the call',thumb:'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&q=70',dur:'0:15',views:'5.6M',likes:'1.2M',type:'short',creator:'Mark G.',avatar:'https://i.pravatar.cc/60?u=c3'},
+  {id:'s2',title:'Drop everything — new music',thumb:'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=400&q=70',dur:'0:22',views:'3.8M',likes:'900K',type:'short',creator:'HOODSTAR365',avatar:'https://i.pravatar.cc/60?u=hoodstar'},
+  {id:'s3',title:'Tokyo night run 🌃',thumb:'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=400&q=70',dur:'0:19',views:'2.2M',likes:'620K',type:'short',creator:'Kaelen Vance',avatar:'https://i.pravatar.cc/60?u=c1'},
+  {id:'se1',title:'Neon City Chronicles S1',thumb:'https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=400&q=70',dur:'8 Eps',views:'4.1M',likes:'1.1M',type:'series',creator:'Zoe Aris',avatar:'https://i.pravatar.cc/60?u=c2'},
+  {id:'se2',title:'The Creator Games',thumb:'https://images.unsplash.com/photo-1520209759809-a9bcb6cb3241?w=400&q=70',dur:'6 Eps',views:'3.3M',likes:'890K',type:'series',creator:'HSW365',avatar:'https://i.pravatar.cc/60?u=hsw'},
+];
+
+const DM_CONVOS = [
+  {id:'dm1',name:'Zoe Aris',handle:'zoearis',avatar:'https://i.pravatar.cc/80?u=c2',last:'The collab looks 🔥 when can we link?',time:'2m',unread:3,online:true},
+  {id:'dm2',name:'Kaelen Vance',handle:'kvance',avatar:'https://i.pravatar.cc/80?u=c1',last:'Sent over the final cut. Check your drive.',time:'18m',unread:0,online:true},
+  {id:'dm3',name:'Mark G.',handle:'markfunny',avatar:'https://i.pravatar.cc/80?u=c3',last:'Bro that last drop was crazy no cap',time:'1h',unread:1,online:false},
+  {id:'dm4',name:'HSW365 Team',handle:'hsw365official',avatar:'https://i.pravatar.cc/80?u=hsw',last:'Analytics report for April is ready.',time:'3h',unread:0,online:false},
+];
+
+const CONVO_MESSAGES = {
+  dm1:[
+    {from:'them',text:'Yo I saw the new drop, absolute fire 🔥',time:'10:12 AM'},
+    {from:'me',text:'Appreciate it! Working on the visual treatment now',time:'10:14 AM'},
+    {from:'them',text:'The collab looks 🔥 when can we link?',time:'10:15 AM'},
+  ],
+  dm2:[
+    {from:'them',text:'Hey, the Tokyo footage came out incredible',time:'Yesterday'},
+    {from:'me',text:'Facts. I need that for the director cut',time:'Yesterday'},
+    {from:'them',text:'Sent over the final cut. Check your drive.',time:'18m ago'},
+  ],
+  dm3:[
+    {from:'them',text:'Bro that last drop was crazy no cap',time:'1h ago'},
+  ],
+  dm4:[
+    {from:'them',text:'Analytics report for April is ready.',time:'3h ago'},
+  ],
+};
+
+const CHAT_AUTO = [
+  'This is WILD','Love this content 🙌','10/10','HOODSTAR365 🔥','drop the album already!!',
+  'first time watching, instantly subbed','the cinematography 😭','WHERE IS THIS FILMED',
+  'W creator','this hits different at night','sending a gift 🎁','💜💜💜','LETS GOOO',
+  'already sharing this','can\'t stop watching','🔥🔥🔥','needs to be on Netflix','legendary'
+];
+const CHAT_COLORS = ['#6366f1','#ec4899','#eab308','#22c55e','#a855f7','#06b6d4','#f97316'];
+
+const MONTHLY_DATA = [
+  {month:'Nov',rev:1800},{month:'Dec',rev:2200},{month:'Jan',rev:1950},
+  {month:'Feb',rev:3100},{month:'Mar',rev:4800},{month:'Apr',rev:6050}
+];
+
+const REGIONS = [
+  {name:'United States',pct:38},{name:'United Kingdom',pct:14},
+  {name:'Canada',pct:11},{name:'Nigeria',pct:9},{name:'Germany',pct:7}
+];
+
+// ── STATE ──
+let currentView = 'home';
+let annualBilling = false;
+let selectedPlan = 'pro';
+let activeDM = 'dm1';
+let dmMessages = JSON.parse(JSON.stringify(CONVO_MESSAGES));
+let chatMessages = [];
+let likedShorts = {};
+
+// ── INIT NAV ──
+function buildNav() {
+  const dn = document.getElementById('desktop-nav');
+  const drav = document.getElementById('drawer-nav');
+  VIEWS.forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn' + (v === currentView ? ' active' : '');
+    btn.id = 'nav-' + v;
+    btn.innerHTML = `<span class="nav-icon">${NAV_ICONS[v]}</span>${NAV_LABELS[v]}`;
+    btn.onclick = () => switchView(v);
+    dn.appendChild(btn);
+
+    const dbtn = document.createElement('button');
+    dbtn.className = 'drawer-nav-btn' + (v === currentView ? ' active' : '');
+    dbtn.id = 'drawer-nav-' + v;
+    dbtn.innerHTML = `<span class="nav-icon">${NAV_ICONS[v]}</span>${NAV_LABELS[v]}`;
+    dbtn.onclick = () => { switchView(v); closeDrawer(); };
+    drav.appendChild(dbtn);
+  });
+}
+
+function switchView(v) {
+  document.getElementById('view-' + currentView).classList.remove('active');
+  document.getElementById('nav-' + currentView).classList.remove('active');
+  document.getElementById('drawer-nav-' + currentView).classList.remove('active');
+  currentView = v;
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('nav-' + v).classList.add('active');
+  document.getElementById('drawer-nav-' + v).classList.add('active');
+  document.getElementById('main').scrollTop = 0;
+}
+
+function toggleDrawer() {
+  document.getElementById('mobile-drawer').classList.toggle('open');
+  document.getElementById('drawer-overlay').classList.toggle('open');
+}
+function closeDrawer() {
+  document.getElementById('mobile-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+// ── BUILD HOME CARDS ──
+function buildCard(v) {
+  return `<div class="card" onclick="">
+    <div class="card-thumb">
+      <img src="${v.thumb}" alt="${v.title}" loading="lazy"/>
+      <div class="card-thumb-grad"></div>
+      <div class="card-dur">${v.dur}</div>
+      <div class="card-play"><div class="play-circle">▶</div></div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${v.title}</div>
+      <div class="card-meta">⭐ ${v.likes} &nbsp;· &nbsp;${v.views} views</div>
+      <div class="card-creator"><img src="${v.avatar}" alt=""/><span>${v.creator}</span></div>
+    </div>
+  </div>`;
+}
+
+function buildHomeRows() {
+  const films = VIDEOS.filter(v=>v.type==='movie');
+  const shorts = VIDEOS.filter(v=>v.type==='short');
+  const series = VIDEOS.filter(v=>v.type==='series');
+  document.getElementById('films-row').innerHTML = films.map(buildCard).join('');
+  document.getElementById('shorts-row').innerHTML = shorts.map(buildCard).join('');
+  document.getElementById('series-row').innerHTML = series.map(buildCard).join('');
+}
+
+// ── BUILD SHORTS ──
+function buildShorts() {
+  const shorts = VIDEOS.filter(v=>v.type==='short');
+  const c = document.getElementById('shorts-container');
+  c.innerHTML = shorts.map((s,i) => `
+    <div class="short-card">
+      <img class="short-bg" src="${s.thumb}" alt="${s.title}" loading="${i===0?'eager':'lazy'}"/>
+      <div class="short-grad"></div>
+      <button class="short-play-btn">▶</button>
+      <div class="short-actions">
+        <div class="short-action">
+          <button class="short-action-btn" id="like-btn-${s.id}" onclick="toggleLike('${s.id}',this,'like-count-${s.id}')">❤️</button>
+          <span class="short-action-label" id="like-count-${s.id}">${s.likes}</span>
+        </div>
+        <div class="short-action">
+          <button class="short-action-btn">💬</button>
+          <span class="short-action-label">2.4K</span>
+        </div>
+        <div class="short-action">
+          <button class="short-action-btn">↗</button>
+          <span class="short-action-label">Share</span>
+        </div>
+        <div class="short-action">
+          <button class="short-action-btn">🔖</button>
+          <span class="short-action-label">Save</span>
+        </div>
+      </div>
+      <div class="short-info">
+        <div class="short-creator">
+          <img src="${s.avatar}" alt="${s.creator}"/>
+          <span class="short-creator-name">${s.creator}</span>
+          <button class="short-creator-follow">Follow</button>
+        </div>
+        <div class="short-title">${s.title}</div>
+        <div class="short-tags"><span class="short-tag">#shorts</span><span class="short-tag">#hsw365</span><span class="short-tag">#viral</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleLike(id, btn, countId) {
+  likedShorts[id] = !likedShorts[id];
+  btn.classList.toggle('liked', likedShorts[id]);
+}
+
+// ── LIVE CHAT ──
+function buildInitialChat() {
+  const seeds = [
+    {user:'CyberKai',text:'This is insane 🔥🔥',color:'#6366f1'},
+    {user:'NeonRayne',text:'Tokyo 2088 looks REAL',color:'#ec4899'},
+    {user:'VoidAlex',text:'How did they film this???',color:'#eab308'},
+    {user:'FluxDaria',text:'waiting for full release 👀',color:'#22c55e'},
+    {user:'GlitchMoe',text:'❤️❤️❤️',color:'#a855f7'},
+  ];
+  const wrap = document.getElementById('chat-messages');
+  seeds.forEach(m => appendChatMsg(m.user, m.text, m.color));
+}
+
+function appendChatMsg(user, text, color) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = `<span class="chat-user" style="color:${color}">${user}</span><span class="chat-text">${text}</span>`;
+  wrap.appendChild(div);
+  if(wrap.children.length > 80) wrap.removeChild(wrap.firstChild);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  if(!inp.value.trim()) return;
+  appendChatMsg('You', inp.value, '#fff');
+  inp.value = '';
+}
+
+function sendReaction(emoji) {
+  appendChatMsg('You', emoji, '#fff');
+}
+
+let chatInterval;
+function startChatAuto() {
+  chatInterval = setInterval(() => {
+    const user = 'Viewer' + Math.floor(Math.random()*9000+1000);
+    const text = CHAT_AUTO[Math.floor(Math.random()*CHAT_AUTO.length)];
+    const color = CHAT_COLORS[Math.floor(Math.random()*CHAT_COLORS.length)];
+    appendChatMsg(user, text, color);
+  }, 1800);
+}
+
+// ── DMs ──
+function buildDMList(filter='') {
+  const list = document.getElementById('dm-list');
+  const filtered = DM_CONVOS.filter(c =>
+    c.name.toLowerCase().includes(filter.toLowerCase()) ||
+    c.handle.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = filtered.map(c => `
+    <div class="dm-item${c.id===activeDM?' active':''}" onclick="selectDM('${c.id}')">
+      <div class="dm-avatar">
+        <img src="${c.avatar}" alt="${c.name}"/>
+        ${c.online?'<div class="online-dot"></div>':''}
+      </div>
+      <div class="dm-info">
+        <div class="dm-name-row"><span class="dm-name">${c.name}</span><span class="dm-time">${c.time}</span></div>
+        <div class="dm-preview">${c.last}</div>
+      </div>
+      ${c.unread>0?`<div class="dm-unread">${c.unread}</div>`:''}
+    </div>
+  `).join('');
+}
+
+function selectDM(id) {
+  activeDM = id;
+  buildDMList(document.getElementById('dm-search').value);
+  renderDMChat();
+}
+
+function renderDMChat() {
+  const convo = DM_CONVOS.find(c=>c.id===activeDM);
+  const infoEl = document.getElementById('dm-chat-user-info');
+  infoEl.innerHTML = `
+    <div style="position:relative">
+      <img src="${convo.avatar}" alt="${convo.name}" style="width:36px;height:36px;border-radius:50%"/>
+      ${convo.online?'<div style="position:absolute;bottom:1px;right:1px;width:9px;height:9px;background:var(--green);border-radius:50%;border:2px solid var(--bg)"></div>':''}
+    </div>
+    <div>
+      <div class="dm-chat-name">${convo.name}</div>
+      <div class="dm-chat-status">@${convo.handle} · ${convo.online?'Online':'Offline'}</div>
+    </div>
+  `;
+  const msgs = document.getElementById('dm-messages');
+  const messages = dmMessages[activeDM] || [];
+  msgs.innerHTML = messages.map(m=>`
+    <div class="msg-row ${m.from}">
+      <div class="msg-bubble">
+        ${m.text}
+        <div class="msg-time">${m.time}${m.from==='me'?' ✓✓':''}</div>
+      </div>
+    </div>
+  `).join('');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function filterDMs() {
+  buildDMList(document.getElementById('dm-search').value);
+}
+
+function sendDM() {
+  const inp = document.getElementById('dm-input');
+  if(!inp.value.trim()) return;
+  if(!dmMessages[activeDM]) dmMessages[activeDM] = [];
+  dmMessages[activeDM].push({from:'me',text:inp.value,time:'Now'});
+  inp.value = '';
+  document.getElementById('dm-send-btn').disabled = true;
+  renderDMChat();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('dm-input');
+  if(inp) {
+    inp.addEventListener('input', () => {
+      document.getElementById('dm-send-btn').disabled = !inp.value.trim();
+    });
+  }
+});
+
+// ── PLANS ──
+const PLANS_DATA = [
+  {
+    id:'free',icon:'⭐',color:'gray',name:'Free',tagline:'Explore the platform',
+    prices:{monthly:0,annual:0},popular:false,
+    features:['Access to free content library','Watch Shorts','Follow creators','480p streaming quality','Limited live stream access'],
+    cta:'Get Started'
+  },
+  {
+    id:'pro',icon:'⚡',color:'indigo',name:'Pro',tagline:'For serious fans & creators',
+    prices:{monthly:12.99,annual:9.99},popular:true,
+    features:['Everything in Free','4K Ultra HD streaming','Full live stream access','Download for offline viewing','Early access to releases','Ad-free experience','Creator DMs'],
+    cta:'Start Pro'
+  },
+  {
+    id:'elite',icon:'👑',color:'yellow',name:'Elite',tagline:'For creators & power users',
+    prices:{monthly:29.99,annual:24.99},popular:false,
+    features:['Everything in Pro','Creator Studio access','Revenue sharing enabled','Business Center analytics','Priority support','Custom creator badge','Co-stream access','Monetize your content'],
+    cta:'Go Elite'
+  }
+];
+
+function buildPlans() {
+  const grid = document.getElementById('plans-grid');
+  grid.innerHTML = PLANS_DATA.map(p => {
+    const price = annualBilling ? p.prices.annual : p.prices.monthly;
+    const isSelected = selectedPlan === p.id;
+    return `
+      <div class="plan-card${isSelected?' selected':''}" onclick="selectPlan('${p.id}')">
+        ${p.popular?'<div class="plan-popular">Most Popular</div>':''}
+        <div class="plan-icon ${p.color}">${p.icon}</div>
+        <div class="plan-name">${p.name}</div>
+        <div class="plan-tagline">${p.tagline}</div>
+        <div class="plan-price">${price===0?'Free':'$'+price}<span>${price>0?'/mo':''}</span></div>
+        <div class="plan-period">${annualBilling&&price>0?'Billed $'+(price*12).toFixed(0)+'/year':' '}</div>
+        <div class="plan-features">
+          ${p.features.map(f=>`<div class="plan-feature"><span class="feature-check">✓</span>${f}</div>`).join('')}
+        </div>
+        <button class="plan-cta ${isSelected?'active':'inactive'}">${p.cta}</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectPlan(id) {
+  selectedPlan = id;
+  buildPlans();
+}
+
+function toggleBilling() {
+  annualBilling = !annualBilling;
+  const btn = document.getElementById('billing-toggle');
+  const ml = document.getElementById('monthly-label');
+  const al = document.getElementById('annual-label');
+  btn.classList.toggle('on', annualBilling);
+  ml.classList.toggle('inactive', annualBilling);
+  al.classList.toggle('inactive', !annualBilling);
+  buildPlans();
+}
+
+// ── BUSINESS CHART ──
+function buildRevChart() {
+  const maxRev = Math.max(...MONTHLY_DATA.map(d=>d.rev));
+  document.getElementById('rev-chart').innerHTML = MONTHLY_DATA.map(d=>`
+    <div class="bar-col">
+      <div class="bar-amt">$${(d.rev/1000).toFixed(1)}k</div>
+      <div class="bar" style="height:${(d.rev/maxRev)*100}%" title="${d.month}: $${d.rev.toLocaleString()}"></div>
+      <div class="bar-month">${d.month}</div>
+    </div>
+  `).join('');
+}
+
+function buildRegions() {
+  document.getElementById('regions').innerHTML = REGIONS.map(r=>`
+    <div class="region-row">
+      <span class="region-name">${r.name}</span>
+      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${r.pct}%;background:rgba(99,102,241,0.6)"></div></div>
+      <span class="region-pct">${r.pct}%</span>
+    </div>
+  `).join('');
+}
+
+function switchTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('biz-overview').style.display = tab==='overview'?'block':'none';
+  document.getElementById('biz-content').style.display = tab==='content'?'block':'none';
+  document.getElementById('biz-audience').style.display = tab==='audience'?'block':'none';
+}
+
+// ── BOOT ──
+buildNav();
+buildHomeRows();
+buildShorts();
+buildDMList();
+renderDMChat();
+buildPlans();
+buildRevChart();
+buildRegions();
+buildInitialChat();
+startChatAuto();
+</script>
+</body>
+</html>
