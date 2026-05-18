@@ -4,504 +4,138 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ArtistEmpire.live</title>
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-font-family:Arial,sans-serif;
-background:#050505;
-color:white;
-line-height:1.6;
-}
-
-header{
-background:#0d0d0d;
-padding:20px;
-border-bottom:1px solid #222;
-position:sticky;
-top:0;
-z-index:1000;
-}
-
-nav{
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-max-width:1200px;
-margin:auto;
-}
-
-.logo{
-font-size:30px;
-font-weight:bold;
-color:#e8ff00;
-}
-
-nav ul{
-display:flex;
-gap:20px;
-list-style:none;
-}
-
-nav a{
-color:white;
-text-decoration:none;
-font-size:14px;
-}
-
-nav a:hover{
-color:#e8ff00;
-}
-
-.hero{
-text-align:center;
-padding:100px 20px;
-background:linear-gradient(to bottom,#111,#050505);
-}
-
-.hero h1{
-font-size:70px;
-color:#e8ff00;
-margin-bottom:20px;
-}
-
-.hero p{
-max-width:700px;
-margin:auto;
-font-size:20px;
-color:#ccc;
-}
-
-.hero-buttons{
-margin-top:30px;
-}
-
-.btn{
-display:inline-block;
-padding:14px 24px;
-margin:10px;
-border-radius:6px;
-text-decoration:none;
-font-weight:bold;
-cursor:pointer;
-border:none;
-}
-
-.btn-primary{
-background:#e8ff00;
-color:black;
-}
-
-.btn-secondary{
-background:transparent;
-border:1px solid #e8ff00;
-color:#e8ff00;
-}
-
-section{
-padding:70px 20px;
-max-width:1200px;
-margin:auto;
-}
-
-section h2{
-text-align:center;
-font-size:40px;
-margin-bottom:40px;
-color:#e8ff00;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-}
-
-.card{
-background:#111;
-padding:25px;
-border-radius:10px;
-border:1px solid #222;
-}
-
-.card h3{
-margin-bottom:15px;
-color:#e8ff00;
-}
-
-.card p{
-color:#ccc;
-}
-
-.price{
-font-size:42px;
-margin:20px 0;
-color:#e8ff00;
-font-weight:bold;
-}
-
-.card button{
-width:100%;
-padding:14px;
-background:#e8ff00;
-color:black;
-border:none;
-border-radius:6px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.card button:hover{
-background:#d8ef00;
-}
-
-form{
-max-width:600px;
-margin:auto;
-}
-
-input,
-textarea{
-width:100%;
-padding:14px;
-margin-bottom:15px;
-background:#111;
-border:1px solid #222;
-border-radius:6px;
-color:white;
-}
-
-textarea{
-min-height:120px;
-}
-
-form button{
-width:100%;
-padding:14px;
-background:#e8ff00;
-border:none;
-color:black;
-font-weight:bold;
-border-radius:6px;
-cursor:pointer;
-}
-
-.dashboard{
-background:#111;
-border:1px solid #222;
-padding:25px;
-border-radius:10px;
-}
-
-.dashboard ul{
-padding-left:20px;
-margin-top:15px;
-}
-
-footer{
-text-align:center;
-padding:30px;
-border-top:1px solid #222;
-color:#777;
-margin-top:50px;
-}
-
-@media(max-width:700px){
-
-.hero h1{
-font-size:45px;
-}
-
-.hero p{
-font-size:16px;
-}
-
-nav{
-flex-direction:column;
-gap:15px;
-}
-
-nav ul{
-flex-wrap:wrap;
-justify-content:center;
-}
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#050505;color:white;line-height:1.6}
+header{background:#080808;border-bottom:1px solid #222;padding:18px;position:sticky;top:0;z-index:99}
+nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+.logo{font-size:26px;font-weight:900;color:#e8ff00}
+nav a{color:white;text-decoration:none;margin:0 8px;font-size:14px}
+nav a:hover{color:#e8ff00}
+.hero{padding:90px 20px;text-align:center;background:linear-gradient(180deg,#161616,#050505)}
+.hero h1{font-size:64px;color:#e8ff00;line-height:1}
+.hero p{max-width:700px;margin:20px auto;color:#ccc;font-size:20px}
+.btn{display:inline-block;padding:14px 24px;border-radius:8px;margin:8px;text-decoration:none;font-weight:bold}
+.btn-main{background:#e8ff00;color:#000}
+.btn-outline{border:1px solid #e8ff00;color:#e8ff00}
+section{max-width:1100px;margin:auto;padding:60px 20px}
+h2{text-align:center;color:#e8ff00;font-size:36px;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{background:#111;border:1px solid #242424;border-radius:14px;padding:25px}
+.card h3{color:#e8ff00;margin-bottom:10px}
+.card p{color:#ccc}
+.price{font-size:42px;color:#e8ff00;font-weight:900;margin:15px 0}
+.card a,.card button{display:block;width:100%;text-align:center;background:#e8ff00;color:#000;text-decoration:none;border:none;border-radius:8px;padding:13px;font-weight:bold;cursor:pointer;margin-top:18px}
+input,textarea{width:100%;padding:14px;margin-bottom:12px;background:#111;border:1px solid #333;color:white;border-radius:8px}
+textarea{min-height:120px}
+footer{text-align:center;padding:30px;border-top:1px solid #222;color:#777}
+@media(max-width:650px){.hero h1{font-size:42px}.hero p{font-size:16px}nav{justify-content:center;text-align:center}}
 </style>
 </head>
-
 <body>
 
 <header>
-
 <nav>
-
-<div class="logo">
-ARTIST EMPIRE
+<div class="logo">ARTIST EMPIRE</div>
+<div>
+<a href="#about">About</a>
+<a href="#features">Features</a>
+<a href="#pricing">Pricing</a>
+<a href="#signup">Signup</a>
+<a href="#contact">Contact</a>
 </div>
-
-<ul>
-<li><a href="#about">About</a></li>
-<li><a href="#features">Features</a></li>
-<li><a href="#pricing">Pricing</a></li>
-<li><a href="#signup">Signup</a></li>
-<li><a href="#contact">Contact</a></li>
-</ul>
-
 </nav>
-
 </header>
 
 <section class="hero">
-
 <h1>OWN YOUR EMPIRE</h1>
-
-<p>
-The indie artist ecosystem for music, merch, streams, exposure, and direct fan support.
-</p>
-
-<div class="hero-buttons">
-
-<a href="#pricing" class="btn btn-primary">
-Join Now
-</a>
-
-<a href="#features" class="btn btn-secondary">
-Explore Features
-</a>
-
-</div>
-
+<p>The indie artist platform for music, merch, video promotion, fan growth, and direct payments.</p>
+<a class="btn btn-main" href="#pricing">Join Now</a>
+<a class="btn btn-outline" href="#signup">Apply as Artist</a>
 </section>
 
 <section id="about">
-
-<h2>About ArtistEmpire</h2>
-
+<h2>What Is ArtistEmpire?</h2>
 <div class="card">
-
-<p>
-ArtistEmpire.live helps independent artists build their brand without major labels.
-Upload music, promote videos, sell merch, connect with fans, and grow your empire independently.
-</p>
-
+<p>ArtistEmpire.live helps independent artists build their own music business. Artists can promote music, sell merch, get video exposure, build a profile, and connect directly with fans without waiting on a major label.</p>
 </div>
-
 </section>
 
 <section id="features">
-
 <h2>Platform Features</h2>
-
 <div class="grid">
-
-<div class="card">
-<h3>Upload Music</h3>
-<p>Promote songs, mixtapes, albums, and previews.</p>
+<div class="card"><h3>Music Promotion</h3><p>Showcase singles, albums, mixtapes, and new releases.</p></div>
+<div class="card"><h3>Merch Sales</h3><p>Promote shirts, hoodies, digital products, and fan bundles.</p></div>
+<div class="card"><h3>Artist Profiles</h3><p>Give every artist a page for music, bio, links, and offers.</p></div>
+<div class="card"><h3>Video Features</h3><p>Promote music videos, interviews, and performance clips.</p></div>
+<div class="card"><h3>Radio Exposure</h3><p>Get placement opportunities through Hoodstar365TVRadio.</p></div>
+<div class="card"><h3>Direct Fan Support</h3><p>Use Stripe checkout to collect real payments from fans and artists.</p></div>
 </div>
-
-<div class="card">
-<h3>Sell Merch</h3>
-<p>Sell hoodies, shirts, digital products, and collectibles.</p>
-</div>
-
-<div class="card">
-<h3>Artist Profiles</h3>
-<p>Create your own custom artist page and fan hub.</p>
-</div>
-
-<div class="card">
-<h3>Video Promotion</h3>
-<p>Promote music videos and livestream performances.</p>
-</div>
-
-<div class="card">
-<h3>Direct Fan Support</h3>
-<p>Get paid directly through Stripe payment links.</p>
-</div>
-
-<div class="card">
-<h3>Radio Exposure</h3>
-<p>Get featured on Hoodstar365TVRadio.</p>
-</div>
-
-</div>
-
 </section>
 
 <section id="pricing">
-
 <h2>Membership Plans</h2>
-
 <div class="grid">
 
 <div class="card">
-
 <h3>Artist Plan</h3>
-
-<div class="price">$20</div>
-
-<p>
-Perfect for solo artists building their fanbase.
-</p>
-
-<br>
-
-<button onclick="startCheckout('artist')">
-Join Artist Plan
-</button>
-
+<div class="price">$20/mo</div>
+<p>For solo artists ready to promote music and grow their fanbase.</p>
+<a href="https://buy.stripe.com/4gM8wPcdx6kmaICfkf3VC00">Join Artist Plan</a>
 </div>
 
 <div class="card">
-
 <h3>Label Plan</h3>
-
-<div class="price">$40</div>
-
-<p>
-For labels and teams managing multiple artists.
-</p>
-
-<br>
-
-<button onclick="startCheckout('label')">
-Join Label Plan
-</button>
-
+<div class="price">$40/mo</div>
+<p>For labels, managers, and teams promoting multiple artists.</p>
+<a href="https://buy.stripe.com/bJe14n5P9aAC4ke6NJ3VC01">Join Label Plan</a>
 </div>
 
 <div class="card">
-
 <h3>Empire Plan</h3>
-
-<div class="price">$99</div>
-
-<p>
-For creators building a serious independent business.
-</p>
-
-<br>
-
-<button onclick="startCheckout('empire')">
-Join Empire Plan
-</button>
-
+<div class="price">$99/mo</div>
+<p>For serious creators building a full independent music business.</p>
+<a href="https://buy.stripe.com/14A28relF7oqg2W2xt3VC03">Join Empire Plan</a>
 </div>
 
 </div>
-
 </section>
 
 <section id="signup">
-
 <h2>Artist Signup</h2>
-
-<form id="signupForm">
-
-<input type="text" placeholder="Artist Name" required>
-
-<input type="email" placeholder="Email Address" required>
-
-<input type="text" placeholder="Instagram or Social Link">
-
-<textarea placeholder="Tell us about yourself"></textarea>
-
-<button type="submit">
-Submit Artist Application
-</button>
-
-</form>
-
-</section>
-
-<section>
-
-<h2>Artist Dashboard Preview</h2>
-
-<div class="dashboard">
-
-<h3>Welcome Back, Artist</h3>
-
-<ul>
-<li>Upload New Music</li>
-<li>Add Merch</li>
-<li>Manage Fan Subscribers</li>
-<li>View Streams</li>
-<li>Track Revenue</li>
-<li>Promote Videos</li>
-</ul>
-
+<div class="card">
+<input id="artistName" placeholder="Artist Name">
+<input id="artistEmail" placeholder="Email Address">
+<input id="artistSocial" placeholder="Instagram / TikTok / YouTube Link">
+<textarea id="artistMessage" placeholder="Tell us about your music"></textarea>
+<button onclick="sendSignup()">Submit Artist Application</button>
 </div>
-
 </section>
 
 <section id="contact">
-
 <h2>Contact</h2>
-
-<form>
-
-<input type="text" placeholder="Your Name">
-
-<input type="email" placeholder="Your Email">
-
-<textarea placeholder="Your Message"></textarea>
-
-<button type="submit">
-Send Message
-</button>
-
-</form>
-
-<br>
-
-<p style="text-align:center;">
-Email: artistempirelive@gmail.com
-</p>
-
+<div class="card" style="text-align:center">
+<p>Email: <strong>artistempirelive@gmail.com</strong></p>
+<a href="mailto:artistempirelive@gmail.com">Email ArtistEmpire</a>
+</div>
 </section>
 
 <footer>
-
-© 2026 ArtistEmpire.live — Built For Independent Artists
-
+© 2026 ArtistEmpire.live — Built for independent artists
 </footer>
 
 <script>
+function sendSignup(){
+var name=document.getElementById("artistName").value;
+var email=document.getElementById("artistEmail").value;
+var social=document.getElementById("artistSocial").value;
+var message=document.getElementById("artistMessage").value;
 
-function startCheckout(plan){
+var subject="ArtistEmpire Artist Application";
+var body="Artist Name: "+name+"%0D%0AEmail: "+email+"%0D%0ASocial Link: "+social+"%0D%0A%0D%0AMessage:%0D%0A"+message;
 
-if(plan === 'artist'){
-window.location.href='https://buy.stripe.com/4gM8wPcdx6kmaICfkf3VC00';
+window.location.href="mailto:artistempirelive@gmail.com?subject="+subject+"&body="+body;
 }
-
-if(plan === 'label'){
-window.location.href='https://buy.stripe.com/bJe14n5P9aAC4ke6NJ3VC01';
-}
-
-if(plan === 'empire'){
-window.location.href='https://buy.stripe.com/14A28relF7oqg2W2xt3VC03';
-}
-
-}
-
-document.getElementById("signupForm").addEventListener("submit", function(e){
-
-e.preventDefault();
-
-alert("Artist application submitted successfully.");
-
-});
-
 </script>
 
 </body>
