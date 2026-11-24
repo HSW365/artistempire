@@ -382,7 +382,7 @@ input,textarea,select{font-family:inherit;color:var(--t1)}
  <div class="eyebrow"><span class="pdot"></span>Music · Beats · Releases</div>
  <h1 class="htitle" style="font-size:clamp(50px,8vw,88px)">THE<br><em>MUSIC</em></h1>
  <p class="hdesc">Stream hot tracks, discover indie artists worldwide, buy beats, and release your music with full freedom of expression.</p>
- <div class="hbtns"><button class="btng" onclick="go('studio')"> Creator Studio</button><button class="btno" onclick="go('plans')"> Go Pro</button></div>
+ <div class="hbtns"><button class="btng" onclick="go('studio')"> Creator Studio</button><button class="btno" onclick="go('plans')" data-hsw-paywall> Go Pro</button><button class="btno" onclick="go('plans')" data-hsw-vip>VIP · Owner</button></div>
  </div>
  </div>
  <div class="secs">
@@ -649,7 +649,8 @@ input,textarea,select{font-family:inherit;color:var(--t1)}
  <div class="vip-ico"></div>
  <div class="vip-text">
  <div class="vip-tag">VIP FREE ACCESS</div>
- <div class="vip-info">Login with <strong>hsw365media@gmail.com</strong> for free access to all tiers — no charge, ever.</div>
+ <div class="vip-info" data-hsw-paywall>Login with <strong>hsw365media@gmail.com</strong> for free access to all tiers — no charge, ever.</div>
+ <div class="vip-info" data-hsw-vip><strong>VIP · Owner</strong> — signed in with your PIN. Fan, Artist and Empire are all unlocked for you. No charge, ever.</div>
  </div>
  </div>
  <div class="btog">
@@ -863,7 +864,15 @@ function sendDM(){
 
 // PLANS 
 var annualB=false,selP='artist';
+// Owner PIN (owner-login.js sets window.HSW_OWNER): every tier is the owner's, no checkout. Static page: client-side only.
+function isOwnerVip(){return !!window.HSW_OWNER;}
 function buildPlans(){
+ if(isOwnerVip()){
+ fill('pgrid',PLANS.map(function(p){
+ return'<div class="pcard sel"><div class="pico">'+p.ico+'</div><div class="pname">'+p.n+'</div><div class="ptagline">'+p.tl+'</div><div class="pprice">Free<sub></sub></div><div class="pbill">Included with VIP · Owner</div><div class="pfeats">'+p.feats.map(function(f){return'<div class="pfeat"><span class="fchk"></span>'+f+'</div>';}).join('')+'</div><button class="pcta gold" disabled aria-disabled="true">Active · VIP Owner</button></div>';
+ }).join(''));
+ return;
+ }
  fill('pgrid',PLANS.map(function(p){
  var price=annualB?p.prices.a:p.prices.m;
  var isSel=selP===p.id;
@@ -880,6 +889,7 @@ function toggleBill(){
  buildPlans();
 }
 function checkout(link,plan,price){
+ if(isOwnerVip()){toast('VIP · Owner: the '+plan+' plan is already yours.');return;}
  toast('Opening '+plan+' plan checkout...');
  setTimeout(function(){window.open(link,'_blank');},600);
 }
@@ -1487,6 +1497,8 @@ renderChat();
 buildPlans();
 buildRevBars();
 buildRegions();
+function paintOwner(){var on=isOwnerVip(),av=document.getElementById('navav');if(av){av.textContent=on?'VIP':'AE';av.title=on?'VIP · Owner: every tier unlocked':'';}buildPlans();}
+window.addEventListener('hsw-owner',paintOwner);
 initChat();
 buildBeatMarket();
 buildDistro();
@@ -1499,6 +1511,6 @@ renderQuotes();
 
 </script>
 <script src="https://calltwin.onrender.com/owner-signin.js" defer></script>
-<script src="owner-login.js" defer></script>
+<script src="owner-login.js?v=3" defer></script>
 </body>
 </html>
