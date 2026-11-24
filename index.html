@@ -319,6 +319,8 @@ input,textarea,select{font-family:inherit;color:var(--t1)}
  .chat-panel{width:240px}
 }
 @media(max-width:600px){.dm-chat{display:none}.dm-sidebar{width:100%}}
+/* Owner PIN (owner-login.js): VIP-only markup stays hidden even if the script never loads */
+html:not(.hsw-owner) [data-hsw-vip]{display:none!important}html.hsw-owner [data-hsw-paywall]{display:none!important}
 </style>
 </head>
 <body>
